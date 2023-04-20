@@ -11,6 +11,8 @@ class args:
             required=True
         )
 
+    # TODO: Store dir
+
     def parse(self, raw_args):
         parsed_args = self.parser.parse_args(raw_args)
         return vars(parsed_args)
