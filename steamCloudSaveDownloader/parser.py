@@ -27,7 +27,7 @@ def parse_time(input:str) -> datetime.datetime:
             now = datetime.datetime.now()
             year = now.year
             d = datetime.datetime.strptime(input, "%d %b @ %I:%M%p")
-            datetime_ = datetime.datetime(year, d.month, d.day, d.hour, d.minute)
+            datetime_ = d.replace(year=year)
         elif len(tokens) == 5:
             datetime_ = datetime.datetime.strptime(input, "%d %b %Y %I:%M%p")
         else:
@@ -37,6 +37,14 @@ def parse_time(input:str) -> datetime.datetime:
 
     return datetime_
 
+def get_appid(link:str) -> int:
+    appid_token = 'appid='
+    appid_location = link.find(appid_token)
+
+    if (appid_location == -1):
+        return -1
+
+    return int(link[appid_location + len(appid_token):])
 
 class web_parser:
     def __init__(self):
@@ -59,7 +67,11 @@ class web_parser:
         rows = tbody.find_all('tr')
         for row in rows:
             cols = row.find_all('td')
-            data.append({"Game": cols[0].text.strip(), "Link": cols[3].a['href']})
+            data.append({
+                "name": cols[0].text.strip(),
+                "link": cols[3].a['href'],
+                "app_id": get_appid(cols[3].a['href'])
+            })
         return data
 
     def parse_game_file(self, content):
@@ -80,8 +92,8 @@ class web_parser:
         for row in rows:
             cols = row.find_all('td')
             data.append({
-                "Filename": cols[1].text.strip(),
-                "Time": parse_time(cols[3].text.strip()),
-                "Link": cols[4].a['href']})
+                "filename": cols[1].text.strip(),
+                "time": parse_time(cols[3].text.strip()),
+                "link": cols[4].a['href']})
         return data
 

@@ -6,12 +6,14 @@ class err_enum(Enum):
     CANNOT_PARSE_LIST = 2
     CANNOT_RETRIEVE_GAME_FILES = 3
     CANNOT_PARSE_GAME_FILES = 4
+    CANNOT_INITIALIZE_DB = 5
 
 ERR_MSG = {
     err_enum.CANNOT_RETRIEVE_LIST: "Cannot retrieve list from steam. Please make sure connected to Internet and cookie is valid.",
     err_enum.CANNOT_PARSE_LIST: "Cannot parse the list. It seems like Steam has update the webpage. Please update to the latest version or notify the author.",
     err_enum.CANNOT_RETRIEVE_GAME_FILES: "Cannot get game files.",
-    err_enum.CANNOT_PARSE_GAME_FILES: "Cannot parse the file list. It seems like Steam has update the webpage. Please update to the latest version or notify the author."
+    err_enum.CANNOT_PARSE_GAME_FILES: "Cannot parse the file list. It seems like Steam has update the webpage. Please update to the latest version or notify the author.",
+    err_enum.CANNOT_INITIALIZE_DB: "Cannot initialize database"
 }
 
 class err(Exception):

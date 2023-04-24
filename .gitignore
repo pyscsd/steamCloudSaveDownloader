@@ -130,5 +130,6 @@ dmypy.json
 
 # Custom
 *.pkl
-dev_venv/
+dev_env/
 cookies-store-steampowered-com.txt
+data/
