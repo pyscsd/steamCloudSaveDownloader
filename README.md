@@ -1,8 +1,14 @@
 # steamCloudSaveDownloader
 Download Cloud Safe
 
+Logo, badges
+
 Rotation
 Specify Directory
+
+Disclaimer: Not affiliated with steam
+
+Rotation mode
 
 Show database mode
 

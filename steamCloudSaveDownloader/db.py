@@ -10,6 +10,7 @@ DB_FILENAME = 'scsd.sqlite3'
 TABLE GAMES
 app_id (integer) PK, CONSTRAINT >0
 game_name (text)
+dir_name (text)
 
 TABLE FILES
 file_id (INT) PK
@@ -49,6 +50,7 @@ class db:
             "CREATE TABLE GAMES("
             "  app_id INTEGER CHECK (app_id>0),"
             "  game_name text,"
+            "  dir_name text,"
             "  PRIMARY KEY (app_id)"
             ");")
 
@@ -66,8 +68,23 @@ class db:
 
     def add_new_game(self, app_id:int, game_name:str):
         cur = self.con.cursor()
-        res = cur.execute("INSERT INTO GAMES VALUES (?, ?);", (app_id, game_name))
+        res = cur.execute("INSERT INTO GAMES VALUES (?, ?, NULL);", (app_id, game_name))
         self.con.commit()
+
+    def set_game_dir(self, app_id:int, dir_name:str):
+        cur = self.con.cursor()
+        res = cur.execute("UPDATE GAMES SET dir_name = ? WHERE app_id = ?;", (dir_name, app_id))
+        self.con.commit()
+
+    def get_game_dir(self, app_id:int) -> str:
+        cur = self.con.cursor()
+        res = cur.execute("SELECT dir_name FROM GAMES WHERE app_id = ?;", (app_id,))
+        game_dir_tuple = res.fetchone()
+
+        if game_dir_tuple is None:
+            return None
+
+        return game_dir_tuple[0]
 
     def is_game_exist(self, app_id:int):
         cur = self.con.cursor()
@@ -91,8 +108,6 @@ class db:
         if time_tuple is None:
             return True
 
-        print(time_tuple[0])
-        print(time)
         if time_tuple[0] < time:
             return True
         else:
