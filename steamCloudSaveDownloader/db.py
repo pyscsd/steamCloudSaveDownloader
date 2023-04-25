@@ -14,7 +14,8 @@ dir_name (text)
 
 TABLE FILES
 file_id (INT) PK
-filename (chr)
+filename (TEXT)
+path (TEXT)
 app_id (INT)
 last_update (datetime)
 '''
@@ -58,6 +59,7 @@ class db:
             "CREATE TABLE FILES("
             "  file_id INTEGER PRIMARY KEY AUTOINCREMENT,"
             "  filename TEXT,"
+            "  path TEXT,"
             "  app_id INTEGER,"
             "  last_update timestamp,"
             "  FOREIGN KEY (app_id) REFERENCES GAMES(app_id)"
@@ -94,10 +96,10 @@ class db:
     def get_game_files(self, app_id: int):
         pass
 
-    # Expect [(filename, app_id, last_update_time), ...]
+    # Expect [(filename, path, app_id, last_update_time), ...]
     def add_new_files(self, file_tuples:list):
         cur = self.con.cursor()
-        res = cur.executemany("INSERT INTO FILES VALUES (NULL, ?, ?, ?);", file_tuples)
+        res = cur.executemany("INSERT INTO FILES VALUES (NULL, ?, ?, ?, ?);", file_tuples)
         self.con.commit()
 
     def is_file_outdated(self, app_id:int, filename:str, time:datetime) -> bool:

@@ -2,7 +2,6 @@ from . import args
 from . import web
 from . import db
 from . import storage
-import random # TODO Move to web
 
 def main(argv):
     parsed_args = args.args().parse(argv)
@@ -22,15 +21,13 @@ def main(argv):
             db_.add_new_game(game['app_id'], game['name'])
             storage_.create_game_folder(game['name'], game['app_id'])
 
-            file_tuples = [(file_info['filename'], game['app_id'], file_info['time']) for file_info in file_infos]
+            file_tuples = [(file_info['filename'], file_info['path'], game['app_id'], file_info['time']) for file_info in file_infos]
             db_.add_new_files(file_tuples)
 
             for file_info in file_infos:
                 print(f"  Downloading {file_info['filename']}")
-                web_.download_game_save(file_info['link'], storage_.get_filename_location(game['app_id'], file_info['filename']))
-            # TODO Uncomment continue, delete break
-            #continue
-            break
+                web_.download_game_save(file_info['link'], storage_.get_filename_location(game['app_id'], file_info['filename'], file_info['path']))
+            continue
 
         for file_info in file_infos:
             if (not db_.is_file_outdated(game['app_id'], file_info['filename'], file_info['time'])):
@@ -38,5 +35,3 @@ def main(argv):
             print(f"  Downloading {file_info['filename']}")
             web_.download_game_save(file_info['link'], storage_.get_filename_location(game['app_id'], file_info['filename']))
             db_.update_file_update_time_to_now(game['app_id'], file_info['filename'])
-        # TODO Remove break
-        break

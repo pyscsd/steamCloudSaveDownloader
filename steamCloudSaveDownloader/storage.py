@@ -48,7 +48,13 @@ class storage:
             raise err.err(err_enum.CANNOT_CREATE_DIRECTORY)
 
 
-    def get_filename_location(self, app_id:int, filename:str):
+    # Implicitly create the path if not exist
+    def get_filename_location(self, app_id:int, filename:str, file_path:str):
         db_game_dir = self.db_.get_game_dir(app_id)
 
-        return os.path.join(self.location, db_game_dir, filename)
+        path_to_save = os.path.join(self.location, db_game_dir, file_path)
+
+        if not os.path.isdir(path_to_save):
+            os.makedirs(path_to_save)
+
+        return os.path.join(path_to_save, filename)

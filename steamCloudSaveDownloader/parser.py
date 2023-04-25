@@ -2,6 +2,7 @@ from . import err
 from .err import err_enum
 from bs4 import BeautifulSoup
 import datetime
+import os
 
 def get_tbody(soup):
     main_content = soup.find(id='main_content')
@@ -16,7 +17,7 @@ def get_tbody(soup):
 
 def parse_time(input:str) -> datetime.datetime:
     if '@' not in input:
-        raise err.err(er_enum.CANNOT_PARSE_GAME_FILES)
+        raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
 
     # Assume 'DD MMM [YYYY] @ HH:MM{a|p}m' format
 
@@ -29,7 +30,7 @@ def parse_time(input:str) -> datetime.datetime:
             d = datetime.datetime.strptime(input, "%d %b @ %I:%M%p")
             datetime_ = d.replace(year=year)
         elif len(tokens) == 5:
-            datetime_ = datetime.datetime.strptime(input, "%d %b %Y %I:%M%p")
+            datetime_ = datetime.datetime.strptime(input, "%d %b, %Y @ %I:%M%p")
         else:
             raise err.err(er_enum.CANNOT_PARSE_GAME_FILES)
     except ValueError:
@@ -74,14 +75,14 @@ class web_parser:
             })
         return data
 
-    def parse_game_file(self, content):
+    def parse_game_file(self, content) -> tuple:
         try:
             return self._parse_game_file(content)
         except err.err as e:
             e.print()
             exit(e.err_enum)
 
-    def _parse_game_file(self, content):
+    def _parse_game_file(self, content) -> tuple:
         soup = BeautifulSoup(content, 'html.parser')
 
         tbody = get_tbody(soup)
@@ -91,9 +92,17 @@ class web_parser:
 
         for row in rows:
             cols = row.find_all('td')
+            path, filename = os.path.split(cols[1].text.strip())
             data.append({
-                "filename": cols[1].text.strip(),
+                "filename": filename,
+                "path": path,
                 "time": parse_time(cols[3].text.strip()),
                 "link": cols[4].a['href']})
-        return data
+
+        has_next = soup.find('a', text='next >>')
+
+        if (has_next is None):
+            return (data, None)
+        else:
+            return (data, has_next['href'])
 
