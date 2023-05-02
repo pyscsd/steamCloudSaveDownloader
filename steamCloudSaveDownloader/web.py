@@ -77,9 +77,8 @@ class web:
             partial_save_file_list, next_page_link = \
                 self._get_game_save(next_page_link)
             save_file_list += partial_save_file_list
-            if (next_page_link is None):
+            if g_dbg_mode or (next_page_link is None):
                 break
-        print(save_file_list)
         return save_file_list
 
     @random_sleep

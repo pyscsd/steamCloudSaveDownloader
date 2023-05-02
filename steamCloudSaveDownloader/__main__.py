@@ -8,12 +8,14 @@ def main(argv):
 
     web_ = web.web(parsed_args['cookie'])
 
-    db_ = db.db(parsed_args['save_dir'])
+    db_ = db.db(parsed_args['save_dir'], parsed_args['rotation'])
     storage_ = storage.storage(parsed_args['save_dir'], db_)
 
     game_list = web_.get_list()
 
     for game in game_list:
+        if game['app_id'] != 1761390:
+            continue;
         print(f"Processing {game['name']}")
         file_infos = web_.get_game_save(game['link'])
 
@@ -26,12 +28,30 @@ def main(argv):
 
             for file_info in file_infos:
                 print(f"  Downloading {file_info['filename']}")
-                web_.download_game_save(file_info['link'], storage_.get_filename_location(game['app_id'], file_info['filename'], file_info['path']))
+                web_.download_game_save(
+                    file_info['link'],
+                    storage_.get_filename_location(game['app_id'],
+                                                   file_info['filename'],
+                                                   file_info['path'],
+                                                   0),
+                )
             continue
 
         for file_info in file_infos:
-            if (not db_.is_file_outdated(game['app_id'], file_info['filename'], file_info['time'])):
+            file_id = db_.get_file_id(game['app_id'], file_info['filename'])
+            if (not db_.is_file_outdated(file_id, file_info['time'])):
                 continue
             print(f"  Downloading {file_info['filename']}")
-            web_.download_game_save(file_info['link'], storage_.get_filename_location(game['app_id'], file_info['filename']))
-            db_.update_file_update_time_to_now(game['app_id'], file_info['filename'])
+            storage_.rotate_file(
+                game['app_id'],
+                file_info['filename'],
+                file_info['path'],
+                file_id)
+            web_.download_game_save(
+                file_info['link'],
+                storage_.get_filename_location(game['app_id'],
+                                               file_info['filename'],
+                                               file_info['path'],
+                                               0)
+            )
+            storage_.remove_outdated(file_id)

@@ -4,7 +4,8 @@ import pathlib
 
 class args:
     def __init__(self):
-        self.parser = argparse.ArgumentParser()
+        self.parser = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         self.parser.add_argument(
             "-c",
             metavar="cookie_file",
@@ -21,6 +22,15 @@ class args:
             type=self.is_path,
             required=True,
             help="Directory to save the downloaded saves and db"
+        )
+
+        self.parser.add_argument(
+            "-r",
+            metavar="rotation_count",
+            dest="rotation",
+            type=int,
+            default=15,
+            help="The amount of version for each file to keep"
         )
 
     def parse(self, raw_args):
