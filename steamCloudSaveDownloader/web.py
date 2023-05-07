@@ -9,6 +9,7 @@ import time
 import random
 
 g_dbg_mode = False
+g_web_acc_link = "https://store.steampowered.com/account/?l=english"
 g_web_link = "https://store.steampowered.com/account/remotestorage/?l=english"
 g_random_sleep_interval = (2, 5)
 
@@ -22,10 +23,13 @@ def random_sleep(func):
 class web:
     def __init__(self, cookie):
         self.cookie_file = cookie.name
-        self.cookie = MozillaCookieJar(self.cookie_file)
-        self.cookie.load()
+        self.cookies = MozillaCookieJar(self.cookie_file)
+        self.cookies.load()
         self.web_parser = web_parser()
+        self.session = requests.Session()
+        self.session.cookies = self.cookies
 
+        response = self.session.get(g_web_acc_link)
 
     # Return list of {"Game": name, "Link", link}
     @random_sleep
@@ -33,7 +37,7 @@ class web:
         response = None
 
         if (not g_dbg_mode):
-            response = requests.get(g_web_link, cookies=self.cookie)
+            response = self.session.get(g_web_link)
             if (response.status_code != 200):
                 print(err.ERR_MSG[err_enum.ERR_CANNOT_RETRIEVE_LIST_MSG], file=sys.stderr)
                 exit(err_enum.ERR_CANNOT_RETRIEVE_LIST.value)
@@ -52,7 +56,7 @@ class web:
     def _get_game_save(self, game_link:str):
         response = None
         if (not g_dbg_mode):
-            response = requests.get(game_link, cookies=self.cookie)
+            response = self.session.get(game_link)
             if (response.status_code != 200):
                 err.err(ERR_CANNOT_RETRIEVE_GAME_FILES).print()
                 return (None, None)
@@ -85,6 +89,6 @@ class web:
     def download_game_save(self, link:str, store_location:str):
         if g_dbg_mode:
             return
-        with requests.get(link, cookies=self.cookie, stream=True) as r:
+        with self.session.get(link, stream=True) as r:
             with open(store_location, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)

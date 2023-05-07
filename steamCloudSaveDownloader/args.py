@@ -1,6 +1,7 @@
 import argparse
 import os
 import pathlib
+import logging
 
 class args:
     def __init__(self):
@@ -32,6 +33,27 @@ class args:
             default=15,
             help="The amount of version for each file to keep"
         )
+
+        self.parser.add_argument(
+            "-l",
+            metavar="log_level",
+            dest="log_level",
+            type=int,
+            default=2,
+            help="How detail should the log be"
+        )
+
+    def convert_log_level(level:int):
+        if (level == 0):
+            return logging.ERROR
+        elif (level == 1):
+            return logging.WARNING
+        elif (level == 2):
+            return logging.INFO
+        else:
+            return logging.DEBUG
+
+
 
     def parse(self, raw_args):
         parsed_args = self.parser.parse_args(raw_args)

@@ -3,6 +3,9 @@ from .err import err_enum
 from bs4 import BeautifulSoup
 import datetime
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_tbody(soup):
     main_content = soup.find(id='main_content')
@@ -55,8 +58,9 @@ class web_parser:
         try:
             return self._parse_index(content)
         except err.err as e:
-            e.print()
-            exit(e.err_enum)
+            logger.error(e.msg())
+            print('There are a few possibilities:\n 1. Your cookie has expired.\n 2. It seems like Steam has update the webpage. Please update to the latest version or notify the author.')
+            exit(e.num())
 
     def _parse_index(self, content):
         soup = BeautifulSoup(content, 'html.parser')

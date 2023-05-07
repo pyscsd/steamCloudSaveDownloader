@@ -1,7 +1,7 @@
 import sys
-from enum import Enum
+from enum import IntEnum
 
-class err_enum(Enum):
+class err_enum(IntEnum):
     CANNOT_RETRIEVE_LIST = 1
     CANNOT_PARSE_LIST = 2
     CANNOT_RETRIEVE_GAME_FILES = 3
@@ -11,7 +11,7 @@ class err_enum(Enum):
 
 ERR_MSG = {
     err_enum.CANNOT_RETRIEVE_LIST: "Cannot retrieve list from steam. Please make sure connected to Internet and cookie is valid.",
-    err_enum.CANNOT_PARSE_LIST: "Cannot parse the list. It seems like Steam has update the webpage. Please update to the latest version or notify the author.",
+    err_enum.CANNOT_PARSE_LIST: "Cannot parse the list.",
     err_enum.CANNOT_RETRIEVE_GAME_FILES: "Cannot get game files.",
     err_enum.CANNOT_PARSE_GAME_FILES: "Cannot parse the file list. It seems like Steam has update the webpage. Please update to the latest version or notify the author.",
     err_enum.CANNOT_INITIALIZE_DB: "Cannot initialize database",
@@ -27,5 +27,5 @@ class err(Exception):
     def num(self):
         return self.err_enum.value
 
-    def print(self):
-        print(ERR_MSG[self.err_enum], file=sys.stderr)
+    def msg(self):
+        return ERR_MSG[self.err_enum]

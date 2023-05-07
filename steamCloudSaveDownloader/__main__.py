@@ -2,11 +2,18 @@ from . import args
 from . import web
 from . import db
 from . import storage
+import logging
+
+logger = logging.getLogger('scsd')
 
 def main(argv):
     parsed_args = args.args().parse(argv)
 
     web_ = web.web(parsed_args['cookie'])
+    logging.basicConfig(
+        format='%(asctime)s [%(levelname)s] %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=args.args.convert_log_level(parsed_args['log_level']))
 
     db_ = db.db(parsed_args['save_dir'], parsed_args['rotation'])
     storage_ = storage.storage(parsed_args['save_dir'], db_)
@@ -14,9 +21,10 @@ def main(argv):
     game_list = web_.get_list()
 
     for game in game_list:
+        # DBG
         if game['app_id'] != 1761390:
             continue;
-        print(f"Processing {game['name']}")
+        logger.info(f"Processing {game['name']}")
         file_infos = web_.get_game_save(game['link'])
 
         if (not db_.is_game_exist(game['app_id'])):
@@ -27,7 +35,7 @@ def main(argv):
             db_.add_new_files(file_tuples)
 
             for file_info in file_infos:
-                print(f"  Downloading {file_info['filename']}")
+                logger.info(f"  Downloading {file_info['filename']}")
                 web_.download_game_save(
                     file_info['link'],
                     storage_.get_filename_location(game['app_id'],
