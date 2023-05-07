@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from steamCloudSaveDownloader.__main__ import main
+from steamCloudSaveDownloader.__main__ import __main__
 import sys
 
-main(sys.argv[1:])
+__main__(sys.argv[1:])

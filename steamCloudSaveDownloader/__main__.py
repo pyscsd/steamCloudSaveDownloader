@@ -2,18 +2,38 @@ from . import args
 from . import web
 from . import db
 from . import storage
+from .err import err
+from .notifier import notifier
 import logging
 
 logger = logging.getLogger('scsd')
 
-def main(argv):
+def __main__(argv):
     parsed_args = args.args().parse(argv)
-
-    web_ = web.web(parsed_args['cookie'])
     logging.basicConfig(
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
         level=args.args.convert_log_level(parsed_args['log_level']))
+
+    notifier_ = notifier.create_instance(
+        parsed_args['notifier'],
+        **parsed_args)
+
+    try:
+        main(parsed_args)
+    except err as e:
+        notifier_.send(e.get_msg(), False)
+        e.log()
+        exit(e.num())
+
+    end_msg = "Process ended noramlly"
+    logger.info(end_msg)
+    notifier_.send(end_msg, True)
+    exit(0)
+
+def main(parsed_args):
+
+    web_ = web.web(parsed_args['cookie'])
 
     db_ = db.db(parsed_args['save_dir'], parsed_args['rotation'])
     storage_ = storage.storage(parsed_args['save_dir'], db_)

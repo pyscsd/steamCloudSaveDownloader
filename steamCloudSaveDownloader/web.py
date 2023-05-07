@@ -24,7 +24,10 @@ class web:
     def __init__(self, cookie):
         self.cookie_file = cookie.name
         self.cookies = MozillaCookieJar(self.cookie_file)
-        self.cookies.load()
+        try:
+            self.cookies.load()
+        except:
+            raise err.err(err_enum.INVALID_COOKIE_FORMAT)
         self.web_parser = web_parser()
         self.session = requests.Session()
         self.session.cookies = self.cookies

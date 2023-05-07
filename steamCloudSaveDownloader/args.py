@@ -2,6 +2,7 @@ import argparse
 import os
 import pathlib
 import logging
+from .notifier import notifier
 
 class args:
     def __init__(self):
@@ -43,6 +44,24 @@ class args:
             help="How detail should the log be"
         )
 
+        self.parser.add_argument(
+            "-n",
+            metavar="notifier",
+            dest="notifier",
+            type=self.supported_notifier,
+            default="",
+            help="Supported notifier: Discord"
+        )
+
+        self.parser.add_argument(
+            "--webhook",
+            metavar="webhook",
+            dest="webhook",
+            default="",
+            required=False,
+            help="Notifier option"
+        )
+
     def convert_log_level(level:int):
         if (level == 0):
             return logging.ERROR
@@ -59,9 +78,14 @@ class args:
         parsed_args = self.parser.parse_args(raw_args)
         return vars(parsed_args)
 
+    def supported_notifier(self, arg):
+        if notifier.is_supported(arg):
+            return arg
+        else:
+            self.parser.error(f"Unsupported notifier '{arg}'")
+
     def is_path(self, arg):
         if os.path.isdir(arg):
             return pathlib.Path(arg)
         else:
             self.parser.error(f"The directory '{arg}' does not exist.")
-
