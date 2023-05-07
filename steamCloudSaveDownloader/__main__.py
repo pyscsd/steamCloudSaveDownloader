@@ -5,11 +5,12 @@ from . import storage
 from .err import err
 from .notifier import notifier
 import logging
+import sys
 
 logger = logging.getLogger('scsd')
 
-def __main__(argv):
-    parsed_args = args.args().parse(argv)
+def __main__():
+    parsed_args = args.args().parse(sys.argv[1:])
     logging.basicConfig(
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
@@ -69,7 +70,7 @@ def main(parsed_args):
             file_id = db_.get_file_id(game['app_id'], file_info['filename'])
             if (not db_.is_file_outdated(file_id, file_info['time'])):
                 continue
-            print(f"  Downloading {file_info['filename']}")
+            logger.info(f"Downloading {file_info['filename']}")
             storage_.rotate_file(
                 game['app_id'],
                 file_info['filename'],

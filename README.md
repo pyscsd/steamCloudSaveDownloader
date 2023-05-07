@@ -1,5 +1,10 @@
 # steamCloudSaveDownloader
-Download Cloud Safe
+Download Save on Steam Cloud
+
+## Early Stage Prototype: DO NOT USE
+
+
+git hook to auto update version
 
 Logo, badges
 
@@ -13,6 +18,8 @@ Rotation mode
 Show database mode
 
 Do not open remotestorage again or will logout???
+
+# Notifier config files
 
 
 ### DOcker
