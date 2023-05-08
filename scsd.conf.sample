@@ -1,0 +1,14 @@
+[Required]
+cookie_file = cookies-store-steampowered-com.txt
+#save_dir = ./data
+#save_dir =
+
+[Log]
+log_level = 2
+
+[Rotation]
+rotation = 15
+
+[Notifier]
+#notifier = discord
+#webhook = https://discord.gg/some_webhook

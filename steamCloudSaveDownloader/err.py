@@ -12,7 +12,8 @@ class err_enum(IntEnum):
     CANNOT_INITIALIZE_DB = 5
     CANNOT_CREATE_DIRECTORY = 6
     INVALID_WEBHOOK_URL = 7
-    INVALID_COOKIE_FORMAT = 8
+    INVALID_COOKIE_FORMAT = 8,
+    INVALID_CONFIG = 9
 
 ERR_INFO = {
     err_enum.CANNOT_RETRIEVE_LIST: [
@@ -46,26 +47,39 @@ ERR_INFO = {
     err_enum.INVALID_COOKIE_FORMAT: [
         logging.ERROR,
         "Invalid cookie format. Should be Netscape format"
+    ],
+    err_enum.INVALID_CONFIG: [
+        logging.ERROR,
+        "Invalid config format: "
     ]
 }
 
 
 class err(Exception):
     def log(self):
+        msg = self.message
+        if self.additional_info:
+            msg += self.additional_info
         if self.level == logging.ERROR:
-            logger.error(self.message)
+            logger.error(msg)
         elif self.level == logging.WARNING:
-            logger.warning(self.message)
+            logger.warning(msg)
         elif self.level == logging.INFO:
-            logger.info(self.message)
+            logger.info(msg)
         else:
-            logger.debug(self.message)
+            logger.debug(msg)
 
     def get_msg(err_enum: err_enum) -> str:
-        return ERR_INFO[err_enum][1]
+        if self.additional_info is None:
+            return ERR_INFO[err_enum][1]
+        else:
+            return ERR_INFO[err_enum][1] + self.additional_info
 
     def get_msg(self) -> str:
-        return self.message
+        if self.additional_info is None:
+            return self.message
+        else:
+            return self.message + self.additional_info
 
     def num(self):
         return self.err_enum.value
@@ -74,4 +88,8 @@ class err(Exception):
         self.err_enum = err_enum_
         self.message = ERR_INFO[self.err_enum][1]
         self.level = ERR_INFO[self.err_enum][0]
+        self.additional_info = None
         super().__init__(self.message)
+
+    def set_additional_info(self, info:str):
+        self.additional_info = info

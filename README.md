@@ -5,6 +5,8 @@ Download Save on Steam Cloud
 
 
 git hook to auto update version
+docker puid pgid
+docker mountable cron
 
 Logo, badges
 

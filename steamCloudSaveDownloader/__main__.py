@@ -4,26 +4,36 @@ from . import db
 from . import storage
 from .err import err
 from .notifier import notifier
+from .config import config
 import logging
 import sys
 
-logger = logging.getLogger('scsd')
+logger = None
 
 def __main__():
-    parsed_args = args.args().parse(sys.argv[1:])
     logging.basicConfig(
         format='%(asctime)s [%(levelname)s] %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-        level=args.args.convert_log_level(parsed_args['log_level']))
-
-    notifier_ = notifier.create_instance(
-        parsed_args['notifier'],
-        **parsed_args)
-
+        datefmt='%Y-%m-%d %H:%M:%S')
+    logger = logging.getLogger('scsd')
     try:
+        notifier_ = None
+        parsed_args = args.args().parse(sys.argv[1:])
+
+        if parsed_args['conf'] is not None:
+            parsed_args = config(parsed_args['conf']).get_conf()
+        print(parsed_args)
+        exit(1)
+
+        logging.setLevel(args.args.convert_log_level(parsed_args['log_level']))
+
+        notifier_ = notifier.create_instance(
+            parsed_args['notifier'],
+            **parsed_args)
+
         main(parsed_args)
     except err as e:
-        notifier_.send(e.get_msg(), False)
+        if notifier_:
+            notifier_.send(e.get_msg(), False)
         e.log()
         exit(e.num())
 

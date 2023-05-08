@@ -68,9 +68,9 @@ class notifier:
 
     def send(self, msg:str, ok:bool):
         if __version__ is None:
-            actual_msg = f'[scsd-{__version__}] '
-        else:
             actual_msg = f'[scsd] '
+        else:
+            actual_msg = f'[scsd-{__version__}] '
         if ok:
             actual_msg += ":white_check_mark: "
         else:
