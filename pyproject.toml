@@ -1,10 +1,10 @@
 [build-system]
-requires = ['hatchling']
+requires = ['hatchling', 'hatch-requirements-txt']
 build-backend = "hatchling.build"
 
 [project]
 name = "scsd"
-version = "0.0.1"
+version = "0.0.6"
 authors = [
   { name="hchsu"}
 ]
@@ -16,6 +16,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dynamic = ["dependencies"]
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
 
 [project.urls]
 "Homepage" = "https://github.com/hhhhhojeihsu/steamCloudSaveDownloader"

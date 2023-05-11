@@ -14,6 +14,7 @@ def __main__():
     logging.basicConfig(
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S')
+    global logger
     logger = logging.getLogger('scsd')
     try:
         notifier_ = None
@@ -21,10 +22,9 @@ def __main__():
 
         if parsed_args['conf'] is not None:
             parsed_args = config(parsed_args['conf']).get_conf()
-        print(parsed_args)
-        exit(1)
 
-        logging.setLevel(args.args.convert_log_level(parsed_args['log_level']))
+        logger.setLevel(args.args.convert_log_level(parsed_args['log_level']))
+        logger.debug(parsed_args)
 
         notifier_ = notifier.create_instance(
             parsed_args['notifier'],
@@ -80,7 +80,7 @@ def main(parsed_args):
             file_id = db_.get_file_id(game['app_id'], file_info['filename'])
             if (not db_.is_file_outdated(file_id, file_info['time'])):
                 continue
-            logger.info(f"Downloading {file_info['filename']}")
+            logger.info(f"  Downloading {file_info['filename']}")
             storage_.rotate_file(
                 game['app_id'],
                 file_info['filename'],

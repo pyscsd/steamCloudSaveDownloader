@@ -13,6 +13,7 @@ Logo, badges
 Rotation
 Specify Directory
 
+Help does not show full msg
 Disclaimer: Not affiliated with steam
 
 Rotation mode
@@ -20,6 +21,8 @@ Rotation mode
 Show database mode
 
 Do not open remotestorage again or will logout???
+
+Running lock file to prevent re execute for cron
 
 # Notifier config files
 
@@ -36,3 +39,4 @@ Specify CronJob
 - Banners
 
 ### Logger
+100,000 Limit

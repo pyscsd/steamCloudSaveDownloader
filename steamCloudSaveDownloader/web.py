@@ -22,7 +22,7 @@ def random_sleep(func):
 
 class web:
     def __init__(self, cookie):
-        self.cookie_file = cookie.name
+        self.cookie_file = cookie
         self.cookies = MozillaCookieJar(self.cookie_file)
         try:
             self.cookies.load()
