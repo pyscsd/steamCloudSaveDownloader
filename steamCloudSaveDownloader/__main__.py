@@ -2,11 +2,13 @@ from . import args
 from . import web
 from . import db
 from . import storage
+from .auth import auth
 from .err import err
 from .notifier import notifier
 from .config import config
 import logging
 import sys
+import os
 
 logger = None
 
@@ -19,6 +21,13 @@ def __main__():
     try:
         notifier_ = None
         parsed_args = args.args().parse(sys.argv[1:])
+
+        if 'auth' in parsed_args and \
+                parsed_args['auth'] is not None and \
+                len(parsed_args['auth']) != 0:
+            print("Auth")
+            auth_ = auth(parsed_args['auth'], parsed_args['save_dir'])
+            exit(0)
 
         if parsed_args['conf'] is not None:
             parsed_args = config(parsed_args['conf']).get_conf()
@@ -44,7 +53,7 @@ def __main__():
 
 def main(parsed_args):
 
-    web_ = web.web(parsed_args['cookie'])
+    web_ = web.web(os.path.join(parsed_args['save_dir'], 'session.sb'))
 
     db_ = db.db(parsed_args['save_dir'], parsed_args['rotation'])
     storage_ = storage.storage(parsed_args['save_dir'], db_)

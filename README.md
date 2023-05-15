@@ -20,8 +20,6 @@ Rotation mode
 
 Show database mode
 
-Do not open remotestorage again or will logout???
-
 Running lock file to prevent re execute for cron
 
 # Notifier config files
@@ -30,13 +28,19 @@ Running lock file to prevent re execute for cron
 ### DOcker
 Specify CronJob
 
-### Windows Version
+### Windows/Mac Version
+
+### External Scheduler
 
 ### CI
 - Gen executable for linux/windows
+- Upload to PyPI
+- Update dockerhub
 
 ### Misc
 - Banners
 
 ### Logger
 100,000 Limit
+
+### Exclusion List

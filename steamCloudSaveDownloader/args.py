@@ -27,11 +27,20 @@ class args:
             return
 
         self.parser.add_argument(
+            "-a",
+            metavar="username",
+            type=str,
+            dest="auth",
+            help="Save authentication"
+        )
+
+
+        self.parser.add_argument(
             "-c",
             metavar="cookie_file",
             dest="cookie",
             type=argparse.FileType('r'),
-            required=True,
+            required=False,
             help="Netscape HTTP Cookie File of store.steampowered.com"
         )
 

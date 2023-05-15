@@ -30,7 +30,7 @@ class notifier:
         if name.lower() == 'discord':
             return notify_method.Discord
         else:
-            return None
+            return notify_method.Nop
 
     def is_supported(name:str):
         if len(name) == 0:
@@ -52,7 +52,9 @@ class notifier:
 
     def __init__(self, method:notify_method, **kwargs):
         self.method = method
-        if (self.method == notify_method.Discord):
+        if (self.method == notify_method.Nop):
+            pass
+        elif (self.method == notify_method.Discord):
             assert 'webhook' in kwargs, 'Discord method requires webhook'
             self.webhook = kwargs['webhook']
 
@@ -76,7 +78,9 @@ class notifier:
         else:
             actual_msg += ":x: "
         actual_msg += f' {msg}'
-        if self.method == notify_method.Discord:
+        if self.method == notify_method.Nop:
+            return
+        elif self.method == notify_method.Discord:
             self.discord_send(actual_msg)
         else:
             assert False

@@ -3,7 +3,7 @@ import os
 import pathlib
 from .err import err
 from .err import err_enum
-from .notifier import notifier
+from .notifier import notifier, notify_method
 
 Defaults = {
     "rotation": 15,
@@ -50,9 +50,6 @@ class config:
         if 'Required' not in self.parser:
             self.raise_err("No [Required] section found")
         required = self.parser['Required']
-
-        self.check_and_raise(required, 'cookie')
-        self.parsed['cookie'] = self.is_file(required['cookie'])
 
         self.check_and_raise(required, 'save_dir')
         self.parsed['save_dir'] = self.is_path(required['save_dir'])

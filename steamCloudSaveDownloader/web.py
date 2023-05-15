@@ -2,8 +2,7 @@ from . import err
 from .err import err_enum
 from .parser import web_parser
 import requests
-from http.cookiejar import MozillaCookieJar
-import pickle # Remove After Mock
+import pickle
 import shutil
 import time
 import random
@@ -22,15 +21,14 @@ def random_sleep(func):
 
 class web:
     def __init__(self, cookie):
-        self.cookie_file = cookie
-        self.cookies = MozillaCookieJar(self.cookie_file)
-        try:
-            self.cookies.load()
-        except:
-            raise err.err(err_enum.INVALID_COOKIE_FORMAT)
         self.web_parser = web_parser()
         self.session = requests.Session()
-        self.session.cookies = self.cookies
+        self.cookie_pkl = cookie
+        try:
+            with open(self.cookie_pkl, 'rb') as f:
+                self.session.cookies.update(pickle.load(f))
+        except:
+            raise err.err(err_enum.INVALID_COOKIE_FORMAT)
 
         response = self.session.get(g_web_acc_link)
 

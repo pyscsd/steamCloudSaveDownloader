@@ -14,6 +14,7 @@ class err_enum(IntEnum):
     INVALID_WEBHOOK_URL = 7
     INVALID_COOKIE_FORMAT = 8,
     INVALID_CONFIG = 9
+    LOGIN_FAIL = 10
 
 ERR_INFO = {
     err_enum.CANNOT_RETRIEVE_LIST: [
@@ -51,6 +52,10 @@ ERR_INFO = {
     err_enum.INVALID_CONFIG: [
         logging.ERROR,
         "Invalid config format: "
+    ],
+    err_enum.LOGIN_FAIL: [
+        logging.ERROR,
+        "Login fail, please try again"
     ]
 }
 
