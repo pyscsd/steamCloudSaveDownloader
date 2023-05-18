@@ -2,7 +2,7 @@ import sys
 from enum import IntEnum
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('scsd')
 
 class err_enum(IntEnum):
     CANNOT_RETRIEVE_LIST = 1
@@ -13,8 +13,10 @@ class err_enum(IntEnum):
     CANNOT_CREATE_DIRECTORY = 6
     INVALID_WEBHOOK_URL = 7
     INVALID_COOKIE_FORMAT = 8,
-    INVALID_CONFIG = 9
-    LOGIN_FAIL = 10
+    INVALID_CONFIG = 9,
+    LOGIN_FAIL = 10,
+    NO_SESSION = 11,
+    CANNOT_REMOVE_OUTDATED = 12
 
 ERR_INFO = {
     err_enum.CANNOT_RETRIEVE_LIST: [
@@ -56,6 +58,14 @@ ERR_INFO = {
     err_enum.LOGIN_FAIL: [
         logging.ERROR,
         "Login fail, please try again"
+    ],
+    err_enum.NO_SESSION: [
+        logging.ERROR,
+        "No session found. Please re-run the program with -a <username> -d <data_dir> first"
+    ],
+    err_enum.CANNOT_REMOVE_OUTDATED: [
+        logging.WARNING,
+        "Cannot remove outdated file: "
     ]
 }
 

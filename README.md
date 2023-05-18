@@ -44,3 +44,19 @@ Specify CronJob
 100,000 Limit
 
 ### Exclusion List
+
+### Config Generator
+
+### Remove DB in Storage Class
+
+### Detect not login page
+
+### Daylight saving time
+
+### Sync Summary
+
+### Move to milestone
+
+### Docker auto pip update
+
+### Add Version info

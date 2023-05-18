@@ -34,16 +34,6 @@ class args:
             help="Save authentication"
         )
 
-
-        self.parser.add_argument(
-            "-c",
-            metavar="cookie_file",
-            dest="cookie",
-            type=argparse.FileType('r'),
-            required=False,
-            help="Netscape HTTP Cookie File of store.steampowered.com"
-        )
-
         self.parser.add_argument(
             "-d",
             metavar="save_dir",

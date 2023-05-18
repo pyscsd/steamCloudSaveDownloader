@@ -3,6 +3,10 @@ import pathlib
 from . import db
 from . import err
 from .err import err_enum
+import datetime
+import logging
+
+logger = logging.getLogger('scsd')
 
 class storage:
     s_version_prefix = '.scsd_'
@@ -73,12 +77,25 @@ class storage:
 
         return os.path.join(path_to_save, filename + version_suffix)
 
-    def increment_file_version(self, app_id:int, filename:str, file_path:str, current_max_version:int):
+    def increment_file_version(self,
+                               app_id:int,
+                               filename:str,
+                               file_path:str,
+                               current_max_version:int):
         db_game_dir = self.db_.get_game_dir(app_id)
 
         path_to_save = os.path.join(self.location, db_game_dir, file_path)
 
-        for old, new in zip(range(current_max_version), range(1, current_max_version + 1)):
+        # if db has 5 versions
+        # rename
+        # version 4 -> 5
+        # version 3 -> 4
+        # version 2 -> 3
+        # version 1 -> 2
+        # version 0 -> 1
+        for old, new in zip(
+                range(current_max_version - 2, -1, -1),
+                range(current_max_version - 1, 0, -1)):
             old_version_suffix = self.get_version_suffix(old)
             new_version_suffix = self.get_version_suffix(new)
 
@@ -87,10 +104,30 @@ class storage:
                 os.path.join(path_to_save, filename + new_version_suffix))
 
     # Move current version 0 to 1, 1 to 2, etc
-    def rotate_file(self, app_id:int, filename:str, file_path:str, file_id:int):
-        num_of_version = self.db_.update_file_update_time_to_now(file_id)
+    # Should be done before download file
+    def rotate_file(self, app_id:int, filename:str, file_path:str, file_id:int, newest_file_time: datetime.datetime):
+        num_of_version = self.db_.update_file_update_time_to_now(file_id, newest_file_time)
         self.increment_file_version(app_id, filename, file_path, num_of_version)
 
-    def remove_outdated(self, file_id:int):
-        # TODO
-        pass
+    def remove_outdated(self,
+                        app_id:int,
+                        filename:str,
+                        file_path:str,
+                        file_id:int):
+        outdated_version_num = self.db_.remove_outdated_file(file_id)
+
+        db_game_dir = self.db_.get_game_dir(app_id)
+        path_to_save = os.path.join(self.location, db_game_dir, file_path)
+
+        if outdated_version_num is None:
+            return
+
+        for version_num_tup in outdated_version_num:
+            version_suffix = self.get_version_suffix(version_num_tup[0])
+            logger.info(f"Remove rotated file {filename + version_suffix}")
+            try:
+                os.remove(os.path.join(path_to_save, filename + version_suffix))
+            except:
+                e = err.err(err_enum.CANNOT_REMOVE_OUTDATED)
+                e.set_additional_info(filename + version_suffix)
+                e.log()

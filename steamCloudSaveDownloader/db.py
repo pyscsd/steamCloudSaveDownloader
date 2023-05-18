@@ -3,6 +3,7 @@ import os
 import datetime
 from . import err
 from .err import err_enum
+import logging
 
 DB_FILENAME = 'scsd.sqlite3'
 
@@ -25,7 +26,7 @@ time (datetime)
 version_num (INT) >= 0
 
 '''
-
+logger = logging.getLogger('scsd')
 class db:
     def __init__(self, db_location:str, rotation:int):
         self.location = db_location
@@ -38,7 +39,8 @@ class db:
             self.initialize_schema()
 
     def __del__(self):
-        self.con.close()
+        if hasattr(self, 'con'):
+            self.con.close()
 
     def schema_ok(self) -> bool:
         cur = self.con.cursor()
@@ -130,18 +132,25 @@ class db:
             res = cur.execute("INSERT INTO FILES VALUES (NULL, ?, ?, ?);", tup[0:3])
             file_id = cur.lastrowid
 
-            res = cur.execute("INSERT INTO VERSION VALUES (NULL, ?, ?, ?);", (file_id, tup[3], 0))
+            no_tz_time = tup[3].replace(tzinfo=None)
+            res = cur.execute("INSERT INTO VERSION VALUES (NULL, ?, ?, ?);", (file_id, no_tz_time, 0))
 
         self.con.commit()
 
-    def is_file_outdated(self, file_id:int, time:datetime) -> bool:
+    def is_file_outdated(self, file_id:int, server_time:datetime) -> bool:
         cur = self.con.cursor()
+        # TODO: Bug timezone in DB
         res = cur.execute("SELECT time FROM VERSION WHERE file_id = ? and version_num = 0;", (file_id,))
-        time_tuple = res.fetchone()
-        if time_tuple is None:
+        db_time_tuple = res.fetchone()
+        if db_time_tuple is None:
+            logger.warning(f'Failed to retrieve newest version time for file_id {file_id}')
             return True
 
-        if time_tuple[0] < time:
+        tz_db_time = db_time_tuple[0].replace(tzinfo=datetime.timezone.utc)
+
+        logger.debug(f'DB time: {tz_db_time}, Server time: {server_time}')
+
+        if tz_db_time < server_time:
             return True
         else:
             return False
@@ -149,16 +158,15 @@ class db:
     # +1 for each version
     # Insert 0 as now
     # Return max version
-    def update_file_update_time_to_now(self, file_id:int) -> int:
+    def update_file_update_time_to_now(self, file_id:int, newest_file_time: datetime.datetime) -> int:
         cur = self.con.cursor()
-        now = datetime.datetime.now()
-        now = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute)
 
         # Increment one for all
         res = cur.execute("UPDATE VERSION SET version_num = version_num + 1 WHERE file_id = ?;", (file_id,))
 
+        time_without_tz = newest_file_time.replace(tzinfo=None)
         # Insert newest as 0
-        res = cur.execute("INSERT INTO VERSION VALUES (NULL, ?, ?, 0)", (file_id, now))
+        res = cur.execute("INSERT INTO VERSION VALUES (NULL, ?, ?, 0)", (file_id, time_without_tz))
         self.con.commit()
 
         res = cur.execute("SELECT COUNT(*) FROM VERSION WHERE file_id = ?", (file_id,))
@@ -169,7 +177,15 @@ class db:
         else:
             return count[0]
 
-    # TODO Rotation
-    def get_outdated_file(file_id:int):
-        res = cur.execute("SELECT version_id FROM WHERE file_id = ? AND version_num >= ?", (file_id, self.rotation))
+    def remove_outdated_file(self, file_id:int):
+        cur = self.con.cursor()
+        res = cur.execute("SELECT version_num FROM VERSION WHERE file_id = ? AND version_num >= ?", (file_id, self.rotation))
+        outdated_version_num = res.fetchall();
 
+        res = cur.execute("DELETE FROM VERSION WHERE file_id = ? AND version_num >= ?", (file_id, self.rotation))
+
+        self.con.commit()
+
+        logger.debug(f"DB Removing version {outdated_version_num}")
+
+        return outdated_version_num

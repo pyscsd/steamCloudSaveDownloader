@@ -3,34 +3,47 @@ from . import web
 from . import db
 from . import storage
 from .auth import auth
-from .err import err
+from . import err
 from .notifier import notifier
 from .config import config
 import logging
 import sys
 import os
+import traceback
 
 logger = None
 
-def __main__():
+def setup_logger():
+    global logger
+
     logging.basicConfig(
         format='%(asctime)s [%(levelname)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S')
-    global logger
     logger = logging.getLogger('scsd')
+
+def parse():
+    parsed_args = args.args().parse(sys.argv[1:])
+
+    if 'auth' in parsed_args and \
+            parsed_args['auth'] is not None and \
+            len(parsed_args['auth']) != 0:
+        auth_ = auth(parsed_args['save_dir'])
+        auth_.new_session(parsed_args['auth'])
+        exit(0)
+
+    if parsed_args['conf'] is not None:
+        parsed_args = config(parsed_args['conf']).get_conf()
+
+    return parsed_args
+
+def __main__():
+    global logger
+
+    notifier_ = None
+
     try:
-        notifier_ = None
-        parsed_args = args.args().parse(sys.argv[1:])
-
-        if 'auth' in parsed_args and \
-                parsed_args['auth'] is not None and \
-                len(parsed_args['auth']) != 0:
-            print("Auth")
-            auth_ = auth(parsed_args['auth'], parsed_args['save_dir'])
-            exit(0)
-
-        if parsed_args['conf'] is not None:
-            parsed_args = config(parsed_args['conf']).get_conf()
+        setup_logger()
+        parsed_args = parse()
 
         logger.setLevel(args.args.convert_log_level(parsed_args['log_level']))
         logger.debug(parsed_args)
@@ -40,10 +53,14 @@ def __main__():
             **parsed_args)
 
         main(parsed_args)
-    except err as e:
+    except err.err as e:
         if notifier_:
             notifier_.send(e.get_msg(), False)
         e.log()
+        exit(e.num())
+    except Exception:
+        if notifier_:
+            notifier_.send(traceback.format_exc(), False)
         exit(e.num())
 
     end_msg = "Process ended noramlly"
@@ -53,7 +70,12 @@ def __main__():
 
 def main(parsed_args):
 
-    web_ = web.web(os.path.join(parsed_args['save_dir'], 'session.sb'))
+    auth_ = auth(parsed_args['save_dir'])
+
+    session_pkl = auth_.get_session_path()
+    if not os.path.isfile(session_pkl):
+        raise err.err(err.err_enum.NO_SESSION)
+    web_ = web.web(session_pkl)
 
     db_ = db.db(parsed_args['save_dir'], parsed_args['rotation'])
     storage_ = storage.storage(parsed_args['save_dir'], db_)
@@ -88,13 +110,15 @@ def main(parsed_args):
         for file_info in file_infos:
             file_id = db_.get_file_id(game['app_id'], file_info['filename'])
             if (not db_.is_file_outdated(file_id, file_info['time'])):
+                logger.info(f"Ignore {file_info['filename']} (no change)")
                 continue
-            logger.info(f"  Downloading {file_info['filename']}")
+            logger.info(f"Downloading {file_info['filename']}")
             storage_.rotate_file(
                 game['app_id'],
                 file_info['filename'],
                 file_info['path'],
-                file_id)
+                file_id,
+                file_info['time'])
             web_.download_game_save(
                 file_info['link'],
                 storage_.get_filename_location(game['app_id'],
@@ -102,4 +126,8 @@ def main(parsed_args):
                                                file_info['path'],
                                                0)
             )
-            storage_.remove_outdated(file_id)
+            storage_.remove_outdated(
+                game['app_id'],
+                file_info['filename'],
+                file_info['path'],
+                file_id)

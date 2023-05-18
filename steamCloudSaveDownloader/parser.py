@@ -6,7 +6,7 @@ import datetime
 import os
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('scsd')
 
 def get_tbody(soup):
     main_content = soup.find(id='main_content')
@@ -29,12 +29,13 @@ def parse_time(input:str) -> datetime.datetime:
     datetime_ = None
     try:
         if len(tokens) == 4:
-            now = datetime.datetime.now()
+            now = datetime.datetime.now(tz=datetime.timezone.utc)
             year = now.year
             d = datetime.datetime.strptime(input, "%d %b @ %I:%M%p")
-            datetime_ = d.replace(year=year)
+            datetime_ = d.replace(year=year, tzinfo=datetime.timezone.utc)
         elif len(tokens) == 5:
             datetime_ = datetime.datetime.strptime(input, "%d %b, %Y @ %I:%M%p")
+            datetime_ = d.replace(tzinfo=datetime.timezone.utc)
         else:
             raise err.err(er_enum.CANNOT_PARSE_GAME_FILES)
     except ValueError:
@@ -97,10 +98,13 @@ class web_parser:
         for row in rows:
             cols = row.find_all('td')
             path, filename = os.path.split(cols[1].text.strip())
+            time_str = cols[3].text.strip()
+            parsed_time = parse_time(time_str)
+            logger.debug(f"Parse {filename} time '{time_str}' as '{parsed_time.isoformat()}'")
             data.append({
                 "filename": filename,
                 "path": path,
-                "time": parse_time(cols[3].text.strip()),
+                "time": parsed_time,
                 "link": cols[4].a['href']})
 
         has_next = soup.find('a', text='next >>')
