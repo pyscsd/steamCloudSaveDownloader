@@ -1,15 +1,9 @@
 from enum import Enum
 from .err import err
 from .err import err_enum
+from . import ver
 import logging
 from discord_webhook import DiscordWebhook
-import importlib.metadata
-
-__version__ = None
-try:
-    __version__ = importlib.metadata.version("scsd")
-except:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -69,10 +63,7 @@ class notifier:
         webhook = webhook.execute()
 
     def send(self, msg:str, ok:bool):
-        if __version__ is None:
-            actual_msg = f'[scsd] '
-        else:
-            actual_msg = f'[scsd-{__version__}] '
+        actual_msg = f'[scsd-{ver.__version__}] '
         if ok:
             actual_msg += ":white_check_mark: "
         else:

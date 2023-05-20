@@ -4,6 +4,7 @@ import pathlib
 import logging
 from .notifier import notifier
 from . import config
+from . import ver
 
 class args:
     def __init__(self):
@@ -18,6 +19,14 @@ class args:
             type=self.is_file,
             default="",
             help="Path to config file. If given, use the settings and ignore all command arguments"
+        )
+
+        self.parser.add_argument(
+            "-v",
+            "--version",
+            dest="version",
+            action='version',
+            version='%(prog)s-{version}'.format(version=ver.__version__)
         )
 
         options, remainder = self.parser.parse_known_args()

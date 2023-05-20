@@ -2,6 +2,7 @@ from . import args
 from . import web
 from . import db
 from . import storage
+from . import ver
 from .auth import auth
 from . import err
 from .notifier import notifier
@@ -46,6 +47,7 @@ def __main__():
         parsed_args = parse()
 
         logger.setLevel(args.args.convert_log_level(parsed_args['log_level']))
+        logger.info(f'scsd-{ver.__version__} started')
         logger.debug(parsed_args)
 
         notifier_ = notifier.create_instance(

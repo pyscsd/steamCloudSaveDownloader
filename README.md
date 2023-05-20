@@ -59,5 +59,3 @@ Per game update once, 85% rule
 ### Move to milestone
 
 ### Docker auto pip update
-
-### Add Version info
