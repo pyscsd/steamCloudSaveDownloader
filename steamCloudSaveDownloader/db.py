@@ -139,7 +139,6 @@ class db:
 
     def is_file_outdated(self, file_id:int, server_time:datetime) -> bool:
         cur = self.con.cursor()
-        # TODO: Bug timezone in DB
         res = cur.execute("SELECT time FROM VERSION WHERE file_id = ? and version_num = 0;", (file_id,))
         db_time_tuple = res.fetchone()
         if db_time_tuple is None:

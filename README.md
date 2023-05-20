@@ -42,6 +42,7 @@ Specify CronJob
 
 ### Logger
 100,000 Limit
+Per game update once, 85% rule
 
 ### Exclusion List
 

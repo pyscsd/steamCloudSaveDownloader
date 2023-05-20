@@ -61,24 +61,6 @@ class args:
             help="How detail should the log be"
         )
 
-        self.parser.add_argument(
-            "-n",
-            metavar="notifier",
-            dest="notifier",
-            type=self.supported_notifier,
-            default=config.Defaults['notifier'],
-            help="Supported notifier: Discord"
-        )
-
-        self.parser.add_argument(
-            "--webhook",
-            metavar="webhook",
-            dest="webhook",
-            default=config.Defaults['webhook'],
-            required=False,
-            help="Notifier option"
-        )
-
     def convert_log_level(level:int):
         if (level == 0):
             return logging.ERROR
@@ -88,8 +70,6 @@ class args:
             return logging.INFO
         else:
             return logging.DEBUG
-
-
 
     def parse(self, raw_args):
         parsed_args = self.parser.parse_args(raw_args)
