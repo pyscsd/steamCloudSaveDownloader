@@ -28,12 +28,14 @@ def parse():
     if 'auth' in parsed_args and \
             parsed_args['auth'] is not None and \
             len(parsed_args['auth']) != 0:
-        auth_ = auth(parsed_args['save_dir'])
+        auth_ = auth(parsed_args['Required']['save_dir'])
         auth_.new_session(parsed_args['auth'])
         exit(0)
 
     if parsed_args['conf'] is not None:
         parsed_args = config(parsed_args['conf']).get_conf()
+    else:
+        parsed_args = config().load_from_arg(parsed_args)
 
     return parsed_args
 
@@ -46,13 +48,13 @@ def __main__():
         setup_logger()
         parsed_args = parse()
 
-        logger.setLevel(args.args.convert_log_level(parsed_args['log_level']))
+        logger.setLevel(args.args.convert_log_level(parsed_args['Log']['log_level']))
         logger.info(f'scsd-{ver.__version__} started')
         logger.debug(parsed_args)
 
         notifier_ = notifier.create_instance(
-            parsed_args['notifier'],
-            **parsed_args)
+            parsed_args['Notifier']['notifier'],
+            **parsed_args['Notifier'])
 
         main(parsed_args)
     except err.err as e:
@@ -72,15 +74,16 @@ def __main__():
 
 def main(parsed_args):
 
-    auth_ = auth(parsed_args['save_dir'])
+    auth_ = auth(parsed_args['Required']['save_dir'])
 
     session_pkl = auth_.get_session_path()
     if not os.path.isfile(session_pkl):
         raise err.err(err.err_enum.NO_SESSION)
     web_ = web.web(session_pkl)
 
-    db_ = db.db(parsed_args['save_dir'], parsed_args['rotation'])
-    storage_ = storage.storage(parsed_args['save_dir'], db_)
+    db_ = db.db(parsed_args['Required']['save_dir'],
+                parsed_args['Rotation']['rotation'])
+    storage_ = storage.storage(parsed_args['Required']['save_dir'], db_)
 
     game_list = web_.get_list()
 

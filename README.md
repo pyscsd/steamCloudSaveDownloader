@@ -59,3 +59,5 @@ Per game update once, 85% rule
 ### Move to milestone
 
 ### Docker auto pip update
+
+### Arg log level do not invert

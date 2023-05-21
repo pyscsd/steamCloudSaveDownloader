@@ -57,7 +57,7 @@ class args:
             metavar="rotation_count",
             dest="rotation",
             type=int,
-            default=config.Defaults['rotation'],
+            default=config.Defaults['Rotation']['rotation'],
             help="The amount of version for each file to keep"
         )
 
@@ -66,7 +66,7 @@ class args:
             metavar="log_level",
             dest="log_level",
             type=int,
-            default=config.Defaults['log_level'],
+            default=config.Defaults['Log']['log_level'],
             help="How detail should the log be"
         )
 
@@ -81,8 +81,7 @@ class args:
             return logging.DEBUG
 
     def parse(self, raw_args):
-        parsed_args = self.parser.parse_args(raw_args)
-        return vars(parsed_args)
+        return vars(self.parser.parse_args(raw_args))
 
     def supported_notifier(self, arg):
         if notifier.is_supported(arg):
