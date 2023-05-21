@@ -34,8 +34,7 @@ def parse_time(input:str) -> datetime.datetime:
             d = datetime.datetime.strptime(input, "%d %b @ %I:%M%p")
             datetime_ = d.replace(year=year, tzinfo=datetime.timezone.utc)
         elif len(tokens) == 5:
-            datetime_ = datetime.datetime.strptime(input, "%d %b, %Y @ %I:%M%p")
-            datetime_ = d.replace(tzinfo=datetime.timezone.utc)
+            datetime_ = datetime.datetime.strptime(input, "%d %b, %Y @ %I:%M%p").replace(tzinfo=datetime.timezone.utc)
         else:
             raise err.err(er_enum.CANNOT_PARSE_GAME_FILES)
     except ValueError:

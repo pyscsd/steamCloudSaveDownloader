@@ -96,8 +96,12 @@ class config:
         if not notifier.is_supported(self.parsed['Notifier']['notifier']):
             self.raise_err(f"Unsupported notifier method '{self.parsed['Notifier']['notifier']}'")
 
+    def delimit_list(self, p_input:str) -> list:
+        return [int(x) for x in p_input.strip().split(',')]
+
     def parse_target(self):
         self.parse_optional_section('Target', ['mode', 'list'])
+        self.parsed['Target']['list'] = self.delimit_list(self.parsed['Target']['list'])
 
     def get_conf(self):
         self.parse_required()

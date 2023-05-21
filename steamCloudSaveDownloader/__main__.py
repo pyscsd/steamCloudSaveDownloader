@@ -39,6 +39,17 @@ def parse():
 
     return parsed_args
 
+def should_process_appid(p_target:dict(), p_input:int) -> bool:
+    if p_target['mode'] is None:
+        return True
+
+    if p_target['mode'] == 'include':
+        return p_input in p_target['list']
+    elif p_target['mode'] == 'exclude':
+        return p_input not in p_target['list']
+
+    return True
+
 def __main__():
     global logger
 
@@ -89,8 +100,10 @@ def main(parsed_args):
 
     for game in game_list:
         # DBG
-        if game['app_id'] != 1761390:
-            continue;
+        if not should_process_appid(parsed_args['Target'], game['app_id']):
+            logger.debug(f"Ignoring {game['name']} ({game['app_id']})")
+            continue
+
         logger.info(f"Processing {game['name']}")
         file_infos = web_.get_game_save(game['link'])
 
