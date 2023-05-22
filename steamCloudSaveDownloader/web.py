@@ -6,6 +6,7 @@ import pickle
 import shutil
 import time
 import random
+import os
 
 g_web_acc_link = "https://store.steampowered.com/account/?l=english"
 g_web_link = "https://store.steampowered.com/account/remotestorage/?l=english"
@@ -19,6 +20,8 @@ def random_sleep(func):
 
 class web:
     def __init__(self, cookie):
+        if not os.path.isfile(cookie):
+            raise err.err(err_enum.NO_SESSION)
         self.web_parser = web_parser()
         self.session = requests.Session()
         self.cookie_pkl = cookie

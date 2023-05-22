@@ -9,7 +9,6 @@ from .notifier import notifier
 from .config import config
 import logging
 import sys
-import os
 import traceback
 
 logger = None
@@ -67,7 +66,7 @@ def __main__():
             parsed_args['Notifier']['notifier'],
             **parsed_args['Notifier'])
 
-        main(parsed_args)
+        summary = main(parsed_args)
     except err.err as e:
         if notifier_:
             notifier_.send(e.get_msg(), False)
@@ -75,21 +74,86 @@ def __main__():
         exit(e.num())
     except Exception:
         if notifier_:
-            notifier_.send(traceback.format_exc(), False)
-        exit(e.num())
+            notifier_.send(f"\n```{traceback.format_exc()}```", False)
+        exit(err.err_enum.UNKNOWN_EXCEPTION.value)
 
-    end_msg = "Process ended noramlly"
-    logger.info(end_msg)
-    notifier_.send(end_msg, True)
+    if summary:
+        notifier_.send(summary, True)
     exit(0)
 
-def main(parsed_args):
+def add_new_game(db_, storage_, web_, game, file_infos, summary) -> str:
+    db_.add_new_game(game['app_id'], game['name'])
+    storage_.create_game_folder(game['name'], game['app_id'])
+
+    file_tuples = [(file_info['filename'], file_info['path'], game['app_id'], file_info['time']) for file_info in file_infos]
+    db_.add_new_files(file_tuples)
+
+    summary += f"{game['name']}\n"
+
+    for file_info in file_infos:
+        summary = download_game_save(storage_, web_, game, file_info, summary)
+
+    return summary
+
+def download_game_save(storage_, web_, game, file_info, summary) -> str:
+    logger.info(f"Downloading {file_info['filename']}")
+    summary += f"↳{file_info['filename']}\n"
+    web_.download_game_save(
+        file_info['link'],
+        storage_.get_filename_location(game['app_id'],
+                                       file_info['filename'],
+                                       file_info['path'],
+                                       0),
+    )
+
+    return summary
+
+'''
+Return true if updated
+'''
+def update_game(db_, storage_, web_, game, summary) -> tuple:
+    logger.info(f"Processing {game['name']}")
+    file_infos = web_.get_game_save(game['link'])
+
+    has_update = False
+
+    if (not db_.is_game_exist(game['app_id'])):
+        summary = add_new_game(db_, storage_, web_, game, file_infos, summary)
+        has_update = True
+        return (has_update, summary)
+
+    for file_info in file_infos:
+        file_id = db_.get_file_id(game['app_id'], file_info['filename'])
+        if (not db_.is_file_outdated(file_id, file_info['time'])):
+            logger.info(f"Ignore {file_info['filename']} (no change)")
+            continue
+
+        if not has_update:
+            summary += f"{game['name']}\n"
+
+        has_update = True
+
+        storage_.rotate_file(
+            game['app_id'],
+            file_info['filename'],
+            file_info['path'],
+            file_id,
+            file_info['time'])
+        summary = download_game_save(storage_, web_, game, file_info, summary)
+
+        storage_.remove_outdated(
+            game['app_id'],
+            file_info['filename'],
+            file_info['path'],
+            file_id)
+
+    return (has_update, summary)
+
+def main(parsed_args) -> str:
 
     auth_ = auth(parsed_args['Required']['save_dir'])
 
     session_pkl = auth_.get_session_path()
-    if not os.path.isfile(session_pkl):
-        raise err.err(err.err_enum.NO_SESSION)
     web_ = web.web(session_pkl)
 
     db_ = db.db(parsed_args['Required']['save_dir'],
@@ -98,54 +162,22 @@ def main(parsed_args):
 
     game_list = web_.get_list()
 
+    summary = "\nExecute summary:\n```\n"
+
+    has_update = False
     for game in game_list:
-        # DBG
         if not should_process_appid(parsed_args['Target'], game['app_id']):
             logger.debug(f"Ignoring {game['name']} ({game['app_id']})")
             continue
 
-        logger.info(f"Processing {game['name']}")
-        file_infos = web_.get_game_save(game['link'])
+        game_has_update, summary = \
+            update_game(db_, storage_, web_, game, summary)
 
-        if (not db_.is_game_exist(game['app_id'])):
-            db_.add_new_game(game['app_id'], game['name'])
-            storage_.create_game_folder(game['name'], game['app_id'])
+        has_update = has_update or game_has_update
 
-            file_tuples = [(file_info['filename'], file_info['path'], game['app_id'], file_info['time']) for file_info in file_infos]
-            db_.add_new_files(file_tuples)
+    if has_update:
+        summary += "```"
+    else:
+        summary = None
 
-            for file_info in file_infos:
-                logger.info(f"  Downloading {file_info['filename']}")
-                web_.download_game_save(
-                    file_info['link'],
-                    storage_.get_filename_location(game['app_id'],
-                                                   file_info['filename'],
-                                                   file_info['path'],
-                                                   0),
-                )
-            continue
-
-        for file_info in file_infos:
-            file_id = db_.get_file_id(game['app_id'], file_info['filename'])
-            if (not db_.is_file_outdated(file_id, file_info['time'])):
-                logger.info(f"Ignore {file_info['filename']} (no change)")
-                continue
-            logger.info(f"Downloading {file_info['filename']}")
-            storage_.rotate_file(
-                game['app_id'],
-                file_info['filename'],
-                file_info['path'],
-                file_id,
-                file_info['time'])
-            web_.download_game_save(
-                file_info['link'],
-                storage_.get_filename_location(game['app_id'],
-                                               file_info['filename'],
-                                               file_info['path'],
-                                               0)
-            )
-            storage_.remove_outdated(
-                game['app_id'],
-                file_info['filename'],
-                file_info['path'],
-                file_id)
+    return summary

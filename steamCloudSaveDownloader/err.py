@@ -16,7 +16,8 @@ class err_enum(IntEnum):
     INVALID_CONFIG = 9,
     LOGIN_FAIL = 10,
     NO_SESSION = 11,
-    CANNOT_REMOVE_OUTDATED = 12
+    CANNOT_REMOVE_OUTDATED = 12,
+    UNKNOWN_EXCEPTION = 256
 
 ERR_INFO = {
     err_enum.CANNOT_RETRIEVE_LIST: [
@@ -66,6 +67,10 @@ ERR_INFO = {
     err_enum.CANNOT_REMOVE_OUTDATED: [
         logging.WARNING,
         "Cannot remove outdated file: "
+    ],
+    err_enum.UNKNOWN_EXCEPTION: [
+        logging.ERROR,
+        "Unknown exception"
     ]
 }
 

@@ -10,20 +10,12 @@ docker mountable cron
 
 Logo, badges
 
-Rotation
-Specify Directory
-
 Help does not show full msg
 Disclaimer: Not affiliated with steam
-
-Rotation mode
 
 Show database mode
 
 Running lock file to prevent re execute for cron
-
-# Notifier config files
-
 
 ### DOcker
 Specify CronJob
@@ -44,8 +36,6 @@ Specify CronJob
 100,000 Limit
 Per game update once, 85% rule
 
-### Exclusion List
-
 ### Config Generator
 
 ### Remove DB in Storage Class
@@ -59,5 +49,3 @@ Per game update once, 85% rule
 ### Move to milestone
 
 ### Docker auto pip update
-
-### Arg log level do not invert
