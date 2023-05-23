@@ -78,6 +78,8 @@ def __main__():
         exit(err.err_enum.UNKNOWN_EXCEPTION.value)
 
     if summary:
+        if (len(summary) > 1000):
+            summary = sumary[0:1000] + "\n...Trunacte\n"
         notifier_.send(summary, True)
     exit(0)
 
@@ -88,16 +90,16 @@ def add_new_game(db_, storage_, web_, game, file_infos, summary) -> str:
     file_tuples = [(file_info['filename'], file_info['path'], game['app_id'], file_info['time']) for file_info in file_infos]
     db_.add_new_files(file_tuples)
 
-    summary += f"{game['name']}\n"
+    summary += f"---\n{game['name']}\n"
 
     for file_info in file_infos:
-        summary = download_game_save(storage_, web_, game, file_info, summary)
+        download_game_save(storage_, web_, game, file_info)
+        summary += f"↳ {file_info['filename']} (new)\n"
 
     return summary
 
-def download_game_save(storage_, web_, game, file_info, summary) -> str:
+def download_game_save(storage_, web_, game, file_info):
     logger.info(f"Downloading {file_info['filename']}")
-    summary += f"↳{file_info['filename']}\n"
     web_.download_game_save(
         file_info['link'],
         storage_.get_filename_location(game['app_id'],
@@ -105,8 +107,6 @@ def download_game_save(storage_, web_, game, file_info, summary) -> str:
                                        file_info['path'],
                                        0),
     )
-
-    return summary
 
 '''
 Return true if updated
@@ -129,7 +129,7 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
             continue
 
         if not has_update:
-            summary += f"{game['name']}\n"
+            summary += f"---\n{game['name']}\n"
 
         has_update = True
 
@@ -139,7 +139,9 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
             file_info['path'],
             file_id,
             file_info['time'])
-        summary = download_game_save(storage_, web_, game, file_info, summary)
+        download_game_save(storage_, web_, game, file_info)
+        timestamp_sec = file_info['time'].replace(tzinfo=None).isoformat(' ', 'seconds')
+        summary += f"↳ {file_info['filename']} ({timestamp_sec})\n"
 
         storage_.remove_outdated(
             game['app_id'],
