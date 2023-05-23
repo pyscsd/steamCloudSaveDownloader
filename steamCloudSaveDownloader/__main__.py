@@ -75,6 +75,7 @@ def __main__():
     except Exception:
         if notifier_:
             notifier_.send(f"\n```{traceback.format_exc()}```", False)
+            print(traceback.format_exc())
         exit(err.err_enum.UNKNOWN_EXCEPTION.value)
 
     if summary:
@@ -96,6 +97,7 @@ def add_new_game(db_, storage_, web_, game, file_infos, summary) -> str:
         download_game_save(storage_, web_, game, file_info)
         summary += f"↳ {file_info['filename']} (new)\n"
 
+    db_.add_requests_count(len(file_infos) + 1)
     return summary
 
 def download_game_save(storage_, web_, game, file_info):
@@ -122,6 +124,7 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
         has_update = True
         return (has_update, summary)
 
+    requests_count = 1
     for file_info in file_infos:
         file_id = db_.get_file_id(game['app_id'], file_info['filename'])
         if (not db_.is_file_outdated(file_id, file_info['time'])):
@@ -140,6 +143,7 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
             file_id,
             file_info['time'])
         download_game_save(storage_, web_, game, file_info)
+        requests_count += 1
         timestamp_sec = file_info['time'].replace(tzinfo=None).isoformat(' ', 'seconds')
         summary += f"↳ {file_info['filename']} ({timestamp_sec})\n"
 
@@ -148,6 +152,8 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
             file_info['filename'],
             file_info['path'],
             file_id)
+
+    db_.add_requests_count(requests_count)
 
     return (has_update, summary)
 
@@ -168,6 +174,8 @@ def main(parsed_args) -> str:
 
     has_update = False
     for game in game_list:
+        if db_.is_requests_limit_exceed():
+            raise err.err(err.err_enum.REQUESTS_LIMIT_EXCEED)
         if not should_process_appid(parsed_args['Target'], game['app_id']):
             logger.debug(f"Ignoring {game['name']} ({game['app_id']})")
             continue

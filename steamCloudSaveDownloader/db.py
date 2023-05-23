@@ -25,9 +25,17 @@ file_id foreign key
 time (datetime)
 version_num (INT) >= 0
 
+TABLE REQUESTS
+id (INT) PK NOT NULL DEFAULT 0
+time (datetime)
+count (int)
+## Enforce single row
+
+
 '''
 logger = logging.getLogger('scsd')
 class db:
+    requests_limit = 85000
     def __init__(self, db_location:str, rotation:int):
         self.location = db_location
         self.rotation = rotation
@@ -49,6 +57,10 @@ class db:
             return False
 
         res = cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='FILES';")
+        if res.fetchone() is None:
+            return False
+
+        res = cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='REQUESTS';")
         if res.fetchone() is None:
             return False
 
@@ -86,8 +98,39 @@ class db:
             "  FOREIGN KEY (file_id) REFERENCES FILES(file_id)"
             ");")
 
+        res = cur.execute(
+            "CREATE TABLE REQUESTS("
+            "  id INTEGER PRIMARY KEY CHECK (id = 0),"
+            "  time timestamp,"
+            "  num int DEFAULT 0"
+            ");")
+
+        res = cur.execute("INSERT INTO REQUESTS VALUES (?, ?, 0);", (0, datetime.datetime.now()))
+
+        self.con.commit()
+
         if not self.schema_ok():
             raise err.err(err_enum.CANNOT_INITIALIZE_DB)
+
+    def add_requests_count(self, count:int):
+        cur = self.con.cursor()
+        res = cur.execute("SELECT time FROM REQUESTS WHERE id = 0;");
+        db_time = res.fetchone()[0]
+
+        now = datetime.datetime.now()
+        if (db_time.date() == now.date()):
+            res = cur.execute("UPDATE REQUESTS SET num = num + ? WHERE id = 0;", (count,))
+        else:
+            res = cur.execute("UPDATE REQUESTS SET num = ?, time = ? WHERE id = 0;", (count, now))
+        self.con.commit()
+
+    def is_requests_limit_exceed(self) -> bool:
+        cur = self.con.cursor()
+        res = cur.execute("SELECT num FROM REQUESTS WHERE id = 0;")
+
+        count = res.fetchone()[0]
+
+        return count >= db.requests_limit
 
     def add_new_game(self, app_id:int, game_name:str):
         cur = self.con.cursor()

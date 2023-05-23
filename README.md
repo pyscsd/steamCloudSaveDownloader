@@ -33,8 +33,6 @@ Specify CronJob
 - Banners
 
 ### Logger
-100,000 Limit
-Per game update once, 85% rule
 
 ### Config Generator
 
@@ -49,3 +47,15 @@ Per game update once, 85% rule
 ### Move to milestone
 
 ### Docker auto pip update
+
+### Tag
+
+### Python Checker
+
+### Special thanks: beta tester
+
+### Windows Scheduler
+
+### Short directory path
+
+### Unit tests
