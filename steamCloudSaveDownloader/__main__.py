@@ -24,6 +24,11 @@ def setup_logger():
 def parse():
     parsed_args = args.args().parse(sys.argv[1:])
 
+    if parsed_args['conf'] is not None:
+        parsed_args = config(parsed_args['conf']).get_conf()
+    else:
+        parsed_args = config().load_from_arg(parsed_args)
+
     if 'auth' in parsed_args and \
             parsed_args['auth'] is not None and \
             len(parsed_args['auth']) != 0:
@@ -31,10 +36,6 @@ def parse():
         auth_.new_session(parsed_args['auth'])
         exit(0)
 
-    if parsed_args['conf'] is not None:
-        parsed_args = config(parsed_args['conf']).get_conf()
-    else:
-        parsed_args = config().load_from_arg(parsed_args)
 
     return parsed_args
 
@@ -75,7 +76,7 @@ def __main__():
     except Exception:
         if notifier_:
             notifier_.send(f"\n```{traceback.format_exc()}```", False)
-            print(traceback.format_exc())
+        print(traceback.format_exc())
         exit(err.err_enum.UNKNOWN_EXCEPTION.value)
 
     if summary:

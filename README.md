@@ -59,3 +59,5 @@ Specify CronJob
 ### Short directory path
 
 ### Unit tests
+
+### Use file name + hashing instead of full path

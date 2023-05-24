@@ -97,6 +97,8 @@ class config:
             self.raise_err(f"Unsupported notifier method '{self.parsed['Notifier']['notifier']}'")
 
     def delimit_list(self, p_input:str) -> list:
+        if p_input is None:
+            return None
         return [int(x) for x in p_input.strip().split(',')]
 
     def parse_target(self):
@@ -119,4 +121,6 @@ class config:
         self.parsed['Rotation']['rotation'] = parsed_args['rotation']
         self.parse_notifier()
         self.parse_target()
+        if 'auth' in parsed_args:
+            self.parsed['auth'] = parsed_args['auth']
         return self.parsed

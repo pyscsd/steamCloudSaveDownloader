@@ -24,7 +24,7 @@ class storage:
             else:
                 dir_name = db_game_dir
         else:
-            dir_name = f"{app_id}__{game_name}"
+            dir_name = f"{app_id}"
 
         target_dir = os.path.join(self.location, dir_name)
 

@@ -11,6 +11,7 @@ class auth:
         self.data_dir = data_dir
 
     def new_session(self, username:str):
+        print("This program will NOT save your credential locally")
         print("2FA codes is case SENSITIVE")
         self.username = username
         self.user = wa.WebAuth(username)
