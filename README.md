@@ -56,8 +56,6 @@ Specify CronJob
 
 ### Windows Scheduler
 
-### Short directory path
-
 ### Unit tests
 
 ### Use file name + hashing instead of full path

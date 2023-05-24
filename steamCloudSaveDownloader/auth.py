@@ -20,8 +20,10 @@ class auth:
         except:
             raise err(err_enum.LOGIN_FAIL)
 
+        prev_umask = os.umask(0O0077)
         with open(self.get_session_path(), 'wb') as f:
             pickle.dump(self.session.cookies, f)
+        os.umask(prev_umask)
 
     def get_session_path(self):
         return os.path.join(self.data_dir, auth.s_session_filename)
