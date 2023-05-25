@@ -13,9 +13,9 @@ Logo, badges
 Help does not show full msg
 Disclaimer: Not affiliated with steam
 
-Show database mode
+### Show database mode
 
-Running lock file to prevent re execute for cron
+### Running lock file to prevent re execute for cron
 
 ### DOcker
 Specify CronJob
@@ -42,8 +42,6 @@ Specify CronJob
 
 ### Daylight saving time
 
-### Sync Summary
-
 ### Move to milestone
 
 ### Docker auto pip update
@@ -59,3 +57,5 @@ Specify CronJob
 ### Unit tests
 
 ### Use file name + hashing instead of full path
+
+### Organizr
