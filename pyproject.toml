@@ -1,10 +1,9 @@
 [build-system]
-requires = ['hatchling', 'hatch-requirements-txt']
+requires = ['hatchling', 'hatch-requirements-txt', "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "scsd"
-version = "0.0.10"
 authors = [
   { name="hchsu"}
 ]
@@ -16,7 +15,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dynamic = ["dependencies"]
+dynamic = ["version", "dependencies"]
 
 [tool.hatch.metadata.hooks.requirements_txt]
 files = ["requirements.txt"]
@@ -28,6 +27,9 @@ files = ["requirements.txt"]
 
 [project.scripts]
 scsd = "steamCloudSaveDownloader.__main__:__main__"
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.ruff]
 select = ["E9", "F63", "F7", "F82"]
