@@ -9,6 +9,8 @@ jobs:
   build:
     uses: pyscsd/steamCloudSaveDownloader/.github/workflows/check-test-build.yml@master
   publish:
+    needs:
+      - build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
