@@ -46,7 +46,7 @@ class web:
     def _get_game_save(self, game_link:str):
         response = self.session.get(game_link)
         if (response.status_code != 200):
-            err.err_enum(ERR_CANNOT_RETRIEVE_GAME_FILES).log
+            err.err_enum(err_enum.CANNOT_RETRIEVE_GAME_FILES).log
             return (None, None)
 
         return self.web_parser.parse_game_file(response.text)

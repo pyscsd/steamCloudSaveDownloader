@@ -81,7 +81,7 @@ def __main__():
 
     if summary:
         if (len(summary) > 1000):
-            summary = sumary[0:1000] + "\n...Trunacte\n"
+            summary = summary[0:1000] + "\n...Trunacte\n"
         notifier_.send(summary, True)
     exit(0)
 

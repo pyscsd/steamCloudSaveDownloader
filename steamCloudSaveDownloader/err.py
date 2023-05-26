@@ -95,10 +95,7 @@ class err(Exception):
             logger.debug(msg)
 
     def get_msg(err_enum: err_enum) -> str:
-        if self.additional_info is None:
-            return ERR_INFO[err_enum][1]
-        else:
-            return ERR_INFO[err_enum][1] + self.additional_info
+        return ERR_INFO[err_enum][1]
 
     def get_msg(self) -> str:
         if self.additional_info is None:

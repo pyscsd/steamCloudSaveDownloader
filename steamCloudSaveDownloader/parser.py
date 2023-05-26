@@ -36,9 +36,9 @@ def parse_time(input:str) -> datetime.datetime:
         elif len(tokens) == 5:
             datetime_ = datetime.datetime.strptime(input, "%d %b, %Y @ %I:%M%p").replace(tzinfo=datetime.timezone.utc)
         else:
-            raise err.err(er_enum.CANNOT_PARSE_GAME_FILES)
+            raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
     except ValueError:
-        raise err.err(er_enum.CANNOT_PARSE_GAME_FILES)
+        raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
 
     return datetime_
 
@@ -112,4 +112,3 @@ class web_parser:
             return (data, None)
         else:
             return (data, has_next['href'])
-
