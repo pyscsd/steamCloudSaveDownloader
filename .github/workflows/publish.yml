@@ -1,0 +1,17 @@
+name: Check-test-build
+
+on:
+  push:
+    #tags:
+    #- 'v*'
+
+jobs:
+  build:
+    uses: pyscsd/steamCloudSaveDownloader/.github/workflows/check-test-build.yml@master
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Publish
+        run: |
+          echo "Test"
