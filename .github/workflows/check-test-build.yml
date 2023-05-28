@@ -41,7 +41,6 @@ jobs:
           pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_x86_64
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
-        if: ${{ inputs.upload-artifact == 'true' }}
         with:
           name: dist
           path: dist/
