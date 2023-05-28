@@ -3,11 +3,6 @@ name: check-test-build
 on:
   push:
   workflow_call:
-    inputs:
-      upload-artifact:
-        required: false
-        default: 'false'
-        type: string
 
 jobs:
   build:
