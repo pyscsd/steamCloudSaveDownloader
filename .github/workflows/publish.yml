@@ -28,7 +28,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Release
-        uses: softprops/action-gh-release
+        uses: softprops/action-gh-release@v1
         with:
           files: |
             dist/*.tar.gz
