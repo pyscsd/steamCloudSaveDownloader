@@ -33,3 +33,22 @@ jobs:
           files: |
             dist/*.tar.gz
             dist/*.whl
+  release:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
