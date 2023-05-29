@@ -38,7 +38,7 @@ jobs:
 
       - name: Pack
         run: |
-          pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_x86_64
+          pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
       - name: Upload whl
         uses: actions/upload-artifact@v3
         with:
@@ -46,3 +46,9 @@ jobs:
           path: |
             dist/*.tar.gz
             dist/*.whl
+      - name: Upload Linux Executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_executable
+          path: |
+            dist/scsd_linux64
