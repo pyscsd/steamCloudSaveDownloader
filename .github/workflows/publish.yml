@@ -35,6 +35,11 @@ jobs:
         with:
           name: dist
           path: dist/
+      - name: Download linux executable
+        uses: actions/download-artifact@v3
+        with:
+          name: linux_executable
+          path: dist/
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
