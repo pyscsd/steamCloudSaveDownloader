@@ -24,7 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff pytest
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-          sudo apt-get install -y upx patchelf
+          sudo apt-get install -y patchelf
       - name: Lint with ruff
         run: |
           # stop the build if there are Python syntax errors or undefined names
