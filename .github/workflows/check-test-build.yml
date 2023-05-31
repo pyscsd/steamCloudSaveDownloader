@@ -39,7 +39,7 @@ jobs:
       - name: Pack
         run: |
           pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
-          staticx --strip dist/scsd_linux64_dl dist/scsd_linux64_static
+          staticx --strip dist/scsd_linux64 dist/scsd_linux64_static
       - name: Upload whl
         uses: actions/upload-artifact@v3
         with:
