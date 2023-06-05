@@ -1,21 +1,17 @@
 FROM alpine:3.17
 
-# TODO: pyinstaller single executable
+# TODO Use pypi add auto update env
+# TODO: Dynamic tag version
 RUN apk --no-cache add \
-      python3 \
-      py3-pip && \
+    python3 \
+    py3-pip && \
     pip install --no-cache-dir scsd && \
     mkdir /data && \
-    chown 1000:1000 /data && \
-    mkdir /config && \
-    chown 1000:1000 /config
+    mkdir /config
 
-
-# TODO: crontab must be owned by root
-COPY docker/cron-root /etc/crontabs/root
+COPY docker/entry.sh /root/entry.sh
+COPY docker/run.sh /opt/run.sh
 
 VOLUME ["/data", "/config"]
 
-# Switch accordingly: crontab must be owned by root
-CMD ["crond", "-f", "-d", "8"]
-
+ENTRYPOINT ["/bin/sh", "/root/entry.sh"]

@@ -7,4 +7,3 @@ ruff>=0.0.270,<1
 pre-commit>=3.3.2,<4
 build>=0.10.0,<1
 twine>=4.0.2,<5
-staticx>=0.13.9,<1

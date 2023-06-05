@@ -58,4 +58,6 @@ Specify CronJob
 
 ### Use file name + hashing instead of full path
 
-### Organizr
+### Default config
+
+### Migrate to other method for workflow authentication

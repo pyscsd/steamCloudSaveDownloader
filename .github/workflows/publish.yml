@@ -46,4 +46,4 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             dist/*.whl
-            dist/scsd_linux64_static
+            dist/scsd_linux64
