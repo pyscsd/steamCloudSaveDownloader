@@ -61,3 +61,5 @@ Specify CronJob
 ### Default config
 
 ### Migrate to other method for workflow authentication
+
+### Support calling Shell script

@@ -52,3 +52,7 @@ jobs:
           name: linux_executable
           path: |
             dist/scsd_linux64
+      - name: Docker Build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
