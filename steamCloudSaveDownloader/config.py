@@ -15,6 +15,7 @@ Defaults = {
         "log_level": 2
     },
     'Notifier': {
+        "notify_if_no_change": False,
         "notifier": "",
         "webhook": ""
     },
@@ -73,26 +74,26 @@ class config:
         self.check_and_raise(required, 'save_dir')
         self.parsed['Required']['save_dir'] = self.is_path(required['save_dir'])
 
-    def parse_optional_section(self, p_section:str, p_entries:list):
+    def parse_optional_section(self, p_section:str):
         if self.parser is not None and p_section in self.parser:
             section = self.parser[p_section]
         else:
             section = dict()
 
-        for entry in p_entries:
+        for entry in Defaults[p_section]:
             if entry in section:
                 self.parsed[p_section][entry] = section[entry]
             else:
                 self.load_default(p_section, entry)
 
     def parse_log(self):
-        self.parse_optional_section('Log', ['log_level'])
+        self.parse_optional_section('Log')
 
     def parse_rotation(self):
-        self.parse_optional_section('Rotation', ['rotation'])
+        self.parse_optional_section('Rotation')
 
     def parse_notifier(self):
-        self.parse_optional_section('Notifier', ['notifier', 'webhook'])
+        self.parse_optional_section('Notifier')
         if not notifier.is_supported(self.parsed['Notifier']['notifier']):
             self.raise_err(f"Unsupported notifier method '{self.parsed['Notifier']['notifier']}'")
 
@@ -102,7 +103,7 @@ class config:
         return [int(x) for x in p_input.strip().split(',')]
 
     def parse_target(self):
-        self.parse_optional_section('Target', ['mode', 'list'])
+        self.parse_optional_section('Target')
         self.parsed['Target']['list'] = self.delimit_list(self.parsed['Target']['list'])
 
     def get_conf(self):

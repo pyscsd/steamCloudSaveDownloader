@@ -83,6 +83,8 @@ def __main__():
         if (len(summary) > 1000):
             summary = summary[0:1000] + "\n...Trunacte\n"
         notifier_.send(summary, True)
+    elif parsed_args['Notifier']['notify_if_no_change']:
+        notifier_.send("No changes", True)
     exit(0)
 
 def add_new_game(db_, storage_, web_, game, file_infos, summary) -> str:
