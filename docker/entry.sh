@@ -3,6 +3,7 @@
 PUID=${PUID:=1000}
 PGID=${PGID:=1000}
 CRON_VAR="${CRON_VAR:=39 */2 * * *}"
+AUTO_UPDATE="${AUTO_UPDATE:=false}"
 
 new_user () {
     id user > /dev/null 2> /dev/null
@@ -45,6 +46,28 @@ set_cron () {
     rm /tmp/cron
 }
 
+setup_auto_update() {
+    echo "[Auto update] starting"
+
+    if [ "${AUTO_UPDATE}" = "false" ]; then
+        crontab -r
+        echo "[Auto udpate] False->disabled"
+        return
+    fi
+
+    cat /etc/crontabs/root | grep 'pip install -U scsd' > /dev/null 2> /dev/null
+    retval=$?
+
+    if [ $retval -eq 0 ]; then
+        echo "[Auto udpate] Exist->Skipped"
+        return
+    fi
+
+    echo "27 */4 * * * pip install -U scsd" >> /etc/crontabs/root
+    echo "[Auto udpate] Added"
+
+}
+
 gen_default_config () {
     if [ -f /config/scsd.conf ]; then
         echo "Config exist skipped"
@@ -64,6 +87,7 @@ gen_default_config () {
 new_user
 set_permission
 set_cron
+setup_auto_update
 gen_default_config
 
 exec crond -f -d 8

@@ -4,10 +4,6 @@ Download Save on Steam Cloud
 ## Early Stage Prototype: DO NOT USE
 
 
-git hook to auto update version
-docker puid pgid
-docker mountable cron
-
 Logo, badges
 
 Help does not show full msg
@@ -17,22 +13,15 @@ Disclaimer: Not affiliated with steam
 
 ### Running lock file to prevent re execute for cron
 
-### DOcker
-Specify CronJob
-
 ### Windows/Mac Version
 
 ### External Scheduler
 
 ### CI
 - Gen executable for linux/windows
-- Upload to PyPI
-- Update dockerhub
 
 ### Misc
 - Banners
-
-### Logger
 
 ### Config Generator
 
@@ -44,12 +33,6 @@ Specify CronJob
 
 ### Move to milestone
 
-### Docker auto pip update
-
-### Tag
-
-### Python Checker
-
 ### Special thanks: beta tester
 
 ### Windows Scheduler
@@ -57,8 +40,6 @@ Specify CronJob
 ### Unit tests
 
 ### Use file name + hashing instead of full path
-
-### Default config
 
 ### Migrate to other method for workflow authentication
 
