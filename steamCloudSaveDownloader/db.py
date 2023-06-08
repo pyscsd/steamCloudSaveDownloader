@@ -50,6 +50,9 @@ class db:
         if hasattr(self, 'con'):
             self.con.close()
 
+    def commit(self):
+        self.con.commit()
+
     def schema_ok(self) -> bool:
         cur = self.con.cursor()
         res = cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='GAMES';")
@@ -152,9 +155,9 @@ class db:
 
         return game_dir_tuple[0]
 
-    def get_file_id(self, app_id:int, filename:str) -> int:
+    def get_file_id(self, app_id:int, path:str, filename:str) -> int:
         cur = self.con.cursor()
-        res = cur.execute("SELECT file_id FROM FILES WHERE app_id=? AND filename=?;", (app_id, filename))
+        res = cur.execute("SELECT file_id FROM FILES WHERE app_id=? AND path=? AND filename=?;", (app_id, path, filename))
         file_id_tuple = res.fetchone()
         if file_id_tuple is None:
             return None

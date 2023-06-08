@@ -129,7 +129,7 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
 
     requests_count = 1
     for file_info in file_infos:
-        file_id = db_.get_file_id(game['app_id'], file_info['filename'])
+        file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
         if (not db_.is_file_outdated(file_id, file_info['time'])):
             logger.info(f"Ignore {file_info['filename']} (no change)")
             continue
