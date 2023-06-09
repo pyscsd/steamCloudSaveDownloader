@@ -75,7 +75,7 @@ jobs:
       - name: Get Tag without v
         id: tag_v
         run: |
-          echo 'version=${{ github.ref_name }}\n' | sed 's/=v/=/g' >> $GITHUB_OUTPUT
+          echo 'version=${{ github.ref_name }}' | sed 's/=v/=/g' >> $GITHUB_OUTPUT
       - name: Wait until pypi availible
         run: sleep 45
       - name: Docker Build and Push
