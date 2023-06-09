@@ -75,7 +75,7 @@ jobs:
           echo version=${{ steps.meta.outputs.tags }} | sed 's/v//g' >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
       - name: Wait until pypi availible
-        uses: nick-fields/retry-step@v2.8.3
+        uses: nick-fields/retry@v2.8.3
         with:
           timeout_minutes: 3
           max_attempts: 5
