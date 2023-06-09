@@ -77,13 +77,7 @@ jobs:
         run: |
           echo version=${DOCKER_METADATA_OUTPUT_VERSION} | sed 's/v//g' >> $GITHUB_OUTPUT
       - name: Wait until pypi availible
-        uses: nick-fields/retry@v2.8.3
-        with:
-          timeout_minutes: 3
-          max_attempts: 5
-          retry_on: error
-          retry_wait_seconds: 15
-          command: /bin/sh -c 'if [ $(curl https://pypi.org/pypi/scsd/json | jq -r .info.version) = "${{ steps.meta.outputs.tags }}" ]; then return 0; else return 1; fi'
+        run: sleep 45
       - name: Docker Build and Push
         uses: docker/build-push-action@v4
         with:
