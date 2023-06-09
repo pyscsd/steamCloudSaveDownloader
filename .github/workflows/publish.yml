@@ -72,8 +72,7 @@ jobs:
       - name: Get Tag without v
         id: tag_v
         run: |
-          echo version=${{ steps.meta.outputs.tags }} | sed 's/v//g' >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+          echo version=${DOCKER_METADATA_OUTPUT_VERSION} | sed 's/v//g' >> $GITHUB_OUTPUT
       - name: Wait until pypi availible
         uses: nick-fields/retry@v2.8.3
         with:
