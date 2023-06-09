@@ -69,8 +69,13 @@ jobs:
           images: |
             hhhhojeihsu/scsd
             # TODO ensure pypi is uploaded
+      - name: Get Tag without v
+        id: tag_v
+        run: |
+          echo version=${{ steps.meta.outputs.tags }} | sed 's/v//g' >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
       - name: Wait until pypi availible
-        uses: actions/retry-step@v2.8.3
+        uses: nick-fields/retry-step@v2.8.3
         with:
           timeout_minutes: 3
           max_attempts: 5
@@ -83,3 +88,5 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            SCSD_VERSION=${{ steps.tag_v.outputs.version }}
