@@ -12,13 +12,22 @@ class args:
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
         # Config file has highest priority
-        self.parser.add_argument(
+        group = self.parser.add_mutually_exclusive_group()
+        group.add_argument(
             "-f",
             metavar="conf",
             dest="conf",
             type=self.is_file,
             default="",
             help="Path to config file. If given, use the settings and ignore all command arguments"
+        )
+
+        group.add_argument(
+            "-a",
+            metavar="username",
+            type=str,
+            dest="auth",
+            help="Save authentication"
         )
 
         self.parser.add_argument(
@@ -29,26 +38,11 @@ class args:
             version='%(prog)s-{version}'.format(version=ver.__version__)
         )
 
-        options, remainder = self.parser.parse_known_args()
-
-        # Break if config file is given
-        if options.conf is not None:
-            return
-
-        self.parser.add_argument(
-            "-a",
-            metavar="username",
-            type=str,
-            dest="auth",
-            help="Save authentication"
-        )
-
         self.parser.add_argument(
             "-d",
             metavar="save_dir",
             dest="save_dir",
             type=self.is_path,
-            required=True,
             help="Directory to save the downloaded saves and db"
         )
 
@@ -81,7 +75,12 @@ class args:
             return logging.DEBUG
 
     def parse(self, raw_args):
-        return vars(self.parser.parse_args(raw_args))
+        parsed_args = self.parser.parse_args(raw_args)
+        if not (parsed_args.conf or parsed_args.auth or parsed_args.save_dir):
+            self.parser.error("Either one of -a, -d or -f is required")
+        if (parsed_args.auth and not parsed_args.save_dir):
+            self.parser.error("`-d save_dir` is required by -a")
+        return vars(parsed_args)
 
     def supported_notifier(self, arg):
         if notifier.is_supported(arg):

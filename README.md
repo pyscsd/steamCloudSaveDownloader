@@ -6,7 +6,6 @@ Download Save on Steam Cloud
 
 Logo, badges
 
-Help does not show full msg
 Disclaimer: Not affiliated with steam
 
 ### Show database mode
@@ -44,3 +43,5 @@ Disclaimer: Not affiliated with steam
 ### Migrate to other method for workflow authentication
 
 ### Support calling Shell script
+
+### Short Style Summary by summary class

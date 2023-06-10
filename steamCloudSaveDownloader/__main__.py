@@ -13,6 +13,8 @@ import traceback
 
 logger = None
 
+g_truncate_max = 1000
+
 def setup_logger():
     global logger
 
@@ -80,8 +82,8 @@ def __main__():
         exit(err.err_enum.UNKNOWN_EXCEPTION.value)
 
     if summary:
-        if (len(summary) > 1000):
-            summary = summary[0:1000] + "\n...Trunacte\n"
+        if (len(summary) > g_truncate_max):
+            summary = summary[0:g_truncate_max] + "\n```...Trunacte\n"
         notifier_.send(summary, True)
     elif parsed_args['Notifier']['notify_if_no_change']:
         notifier_.send("No changes", True)
