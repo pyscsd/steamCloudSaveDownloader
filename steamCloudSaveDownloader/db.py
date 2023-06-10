@@ -183,22 +183,22 @@ class db:
 
         self.con.commit()
 
-    def is_file_outdated(self, file_id:int, server_time:datetime) -> bool:
+    def is_file_outdated(self, file_id:int, server_time:datetime) -> tuple:
         cur = self.con.cursor()
         res = cur.execute("SELECT time FROM VERSION WHERE file_id = ? and version_num = 0;", (file_id,))
         db_time_tuple = res.fetchone()
         if db_time_tuple is None:
             logger.warning(f'Failed to retrieve newest version time for file_id {file_id}')
-            return True
+            return (True, None)
 
         tz_db_time = db_time_tuple[0].replace(tzinfo=datetime.timezone.utc)
 
         logger.debug(f'DB time: {tz_db_time}, Server time: {server_time}')
 
         if tz_db_time < server_time:
-            return True
+            return (True, tz_db_time)
         else:
-            return False
+            return (False, tz_db_time)
 
     # +1 for each version
     # Insert 0 as now

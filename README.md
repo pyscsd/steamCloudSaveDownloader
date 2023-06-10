@@ -1,7 +1,6 @@
 # steamCloudSaveDownloader
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Check and Build](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/check-test-build.yml/badge.svg)](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/check-test-build.yml/) [![Publish](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/publish.yml/badge.svg)](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/publish.yml/) [![PyPi](https://img.shields.io/pypi/v/scsd)](https://pypi.org/project/scsd/) [![GitHub Release](https://img.shields.io/github/v/release/pyscsd/steamCloudSaveDownloader)](https://github.com/pyscsd/steamCloudSaveDownloader/releases)
 
-
 Download/Backup Saves on Steam Cloud
 
 ## Early Stage Prototype: DO NOT USE
@@ -48,4 +47,6 @@ Disclaimer: Not affiliated with steam
 
 ### Support calling Shell script
 
-### Short Style Summary by summary class
+### Log to file and Rotate
+
+### Support Mail

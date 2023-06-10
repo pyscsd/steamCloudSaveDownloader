@@ -17,7 +17,8 @@ Defaults = {
     'Notifier': {
         "notify_if_no_change": False,
         "notifier": "",
-        "webhook": ""
+        "webhook": "",
+        "level": 1
     },
     'Target': {
         "mode": None,

@@ -7,13 +7,12 @@ from .auth import auth
 from . import err
 from .notifier import notifier
 from .config import config
+from .summary import summary
 import logging
 import sys
 import traceback
 
 logger = None
-
-g_truncate_max = 1000
 
 def setup_logger():
     global logger
@@ -69,7 +68,7 @@ def __main__():
             parsed_args['Notifier']['notifier'],
             **parsed_args['Notifier'])
 
-        summary = main(parsed_args)
+        main(parsed_args, notifier_)
     except err.err as e:
         if notifier_:
             notifier_.send(e.get_msg(), False)
@@ -80,30 +79,26 @@ def __main__():
             notifier_.send(f"\n```{traceback.format_exc()}```", False)
         print(traceback.format_exc())
         exit(err.err_enum.UNKNOWN_EXCEPTION.value)
-
-    if summary:
-        if (len(summary) > g_truncate_max):
-            summary = summary[0:g_truncate_max] + "\n```...Trunacte\n"
-        notifier_.send(summary, True)
-    elif parsed_args['Notifier']['notify_if_no_change']:
-        notifier_.send("No changes", True)
     exit(0)
 
-def add_new_game(db_, storage_, web_, game, file_infos, summary) -> str:
+def add_new_game(db_, storage_, web_, game, file_infos, summary_):
     db_.add_new_game(game['app_id'], game['name'])
     storage_.create_game_folder(game['name'], game['app_id'])
 
     file_tuples = [(file_info['filename'], file_info['path'], game['app_id'], file_info['time']) for file_info in file_infos]
     db_.add_new_files(file_tuples)
 
-    summary += f"---\n{game['name']}\n"
+    summary_.add_game(game['name'])
 
     for file_info in file_infos:
         download_game_save(storage_, web_, game, file_info)
-        summary += f"↳ {file_info['filename']} (new)\n"
+        summary_.add_game_file(
+            game['name'],
+            file_info['filename'],
+            None,
+            file_info['time'])
 
     db_.add_requests_count(len(file_infos) + 1)
-    return summary
 
 def download_game_save(storage_, web_, game, file_info):
     logger.info(f"Downloading {file_info['filename']}")
@@ -118,28 +113,23 @@ def download_game_save(storage_, web_, game, file_info):
 '''
 Return true if updated
 '''
-def update_game(db_, storage_, web_, game, summary) -> tuple:
+def update_game(db_, storage_, web_, game, summary_):
     logger.info(f"Processing {game['name']}")
     file_infos = web_.get_game_save(game['link'])
 
-    has_update = False
-
     if (not db_.is_game_exist(game['app_id'])):
-        summary = add_new_game(db_, storage_, web_, game, file_infos, summary)
-        has_update = True
-        return (has_update, summary)
+        add_new_game(db_, storage_, web_, game, file_infos, summary_)
+        return
 
     requests_count = 1
     for file_info in file_infos:
         file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
-        if (not db_.is_file_outdated(file_id, file_info['time'])):
+        outdated, db_time = db_.is_file_outdated(file_id, file_info['time'])
+        if (not outdated):
             logger.info(f"Ignore {file_info['filename']} (no change)")
             continue
 
-        if not has_update:
-            summary += f"---\n{game['name']}\n"
-
-        has_update = True
+        summary_.add_game(game['name'])
 
         storage_.rotate_file(
             game['app_id'],
@@ -149,8 +139,11 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
             file_info['time'])
         download_game_save(storage_, web_, game, file_info)
         requests_count += 1
-        timestamp_sec = file_info['time'].replace(tzinfo=None).isoformat(' ', 'seconds')
-        summary += f"↳ {file_info['filename']} ({timestamp_sec})\n"
+        summary_.add_game_file(
+            game['name'],
+            file_info['filename'],
+            db_time,
+            file_info['time'])
 
         storage_.remove_outdated(
             game['app_id'],
@@ -160,10 +153,10 @@ def update_game(db_, storage_, web_, game, summary) -> tuple:
 
     db_.add_requests_count(requests_count)
 
-    return (has_update, summary)
+    return
 
-def main(parsed_args) -> str:
-
+def main(parsed_args, notifier_):
+    summary_ = summary(int(parsed_args['Notifier']['level']))
     auth_ = auth(parsed_args['Required']['save_dir'])
 
     session_pkl = auth_.get_session_path()
@@ -175,9 +168,6 @@ def main(parsed_args) -> str:
 
     game_list = web_.get_list()
 
-    summary = "\nExecute summary:\n```\n"
-
-    has_update = False
     for game in game_list:
         if db_.is_requests_limit_exceed():
             raise err.err(err.err_enum.REQUESTS_LIMIT_EXCEED)
@@ -185,14 +175,12 @@ def main(parsed_args) -> str:
             logger.debug(f"Ignoring {game['name']} ({game['app_id']})")
             continue
 
-        game_has_update, summary = \
-            update_game(db_, storage_, web_, game, summary)
+        update_game(db_, storage_, web_, game, summary_)
 
-        has_update = has_update or game_has_update
-
-    if has_update:
-        summary += "```"
+    if summary_.has_changes():
+        summary_str = summary_.get()
+        if summary_str and len(summary_str) != 0:
+            notifier_.send(summary_str, True)
     else:
-        summary = None
-
-    return summary
+        if parsed_args['Notifier']['notify_if_no_change']:
+            notifier_.send("No changes", True)
