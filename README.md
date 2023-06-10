@@ -1,7 +1,10 @@
 # steamCloudSaveDownloader
-Download Save on Steam Cloud
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Check and Build](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/check-test-build.yml/badge.svg)](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/check-test-build.yml/) [![Publish](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/publish.yml/badge.svg)](https://github.com/pyscsd/steamCloudSaveDownloader/actions/workflows/publish.yml/)
+
+Download/Backup Saves on Steam Cloud
 
 ## Early Stage Prototype: DO NOT USE
+
 
 
 Logo, badges
