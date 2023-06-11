@@ -77,7 +77,7 @@ jobs:
         run: |
           echo 'version=${{ github.ref_name }}' | sed 's/=v/=/g' >> $GITHUB_OUTPUT
       - name: Wait until pypi availible
-        run: sleep 45
+        run: sleep 90
       - name: Docker Build and Push
         uses: docker/build-push-action@v4
         with:
