@@ -9,20 +9,20 @@ Defaults = {
     'Required': {
     },
     'Rotation': {
-        "rotation": 15
+        "rotation": (int, 15)
     },
     'Log': {
-        "log_level": 2
+        "log_level": (int, 2)
     },
     'Notifier': {
-        "notify_if_no_change": False,
-        "notifier": "",
-        "webhook": "",
-        "level": 1
+        "notify_if_no_change": (bool, False),
+        "notifier": (str, ""),
+        "webhook": (str, ""),
+        "level": (int, 1)
     },
     'Target': {
-        "mode": None,
-        "list": None
+        "mode": (str, ""),
+        "list": (str, "")
     }
 }
 
@@ -64,8 +64,21 @@ class config:
         if entry not in obj:
             self.raise_err(f"'{entry}' required in config")
 
+    def type_convert(self, p_type, p_val):
+        if (p_type == str):
+            return str(p_val)
+        elif (p_type == int):
+            return int(p_val)
+        elif (p_type == bool):
+            return bool(p_val)
+        else:
+            assert False, 'Unsupported type'
+
+
     def load_default(self, p_section:str, p_entry:str):
-        self.parsed[p_section][p_entry] = Defaults[p_section][p_entry]
+        tup = Defaults[p_section][p_entry]
+        self.parsed[p_section][p_entry] = \
+            self.type_convert(tup[0], tup[1])
 
     def parse_required(self):
         if 'Required' not in self.parser:
@@ -82,8 +95,10 @@ class config:
             section = dict()
 
         for entry in Defaults[p_section]:
+            type_ = Defaults[p_section][entry][0]
             if entry in section:
-                self.parsed[p_section][entry] = section[entry]
+                self.parsed[p_section][entry] = \
+                    self.type_convert(type_, section[entry])
             else:
                 self.load_default(p_section, entry)
 
@@ -99,7 +114,7 @@ class config:
             self.raise_err(f"Unsupported notifier method '{self.parsed['Notifier']['notifier']}'")
 
     def delimit_list(self, p_input:str) -> list:
-        if p_input is None:
+        if p_input is None or len(p_input) == 0:
             return None
         return [int(x) for x in p_input.strip().split(',')]
 

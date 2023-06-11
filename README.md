@@ -50,3 +50,5 @@ Disclaimer: Not affiliated with steam
 ### Log to file and Rotate
 
 ### Support Mail
+
+### Redacted TOkens, dir, appid etc.

@@ -41,7 +41,7 @@ def parse():
     return parsed_args
 
 def should_process_appid(p_target:dict(), p_input:int) -> bool:
-    if p_target['mode'] is None:
+    if p_target['mode'] == '':
         return True
 
     if p_target['mode'] == 'include':
