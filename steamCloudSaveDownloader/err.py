@@ -27,7 +27,7 @@ ERR_INFO = {
     ],
     err_enum.CANNOT_PARSE_LIST: [
         logging.ERROR,
-        "Cannot parse the list."
+        "Cannot parse the list. (Session expired or program outdated)"
     ],
     err_enum.CANNOT_RETRIEVE_GAME_FILES: [
         logging.ERROR,
