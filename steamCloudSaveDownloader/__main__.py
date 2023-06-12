@@ -9,18 +9,34 @@ from .notifier import notifier
 from .config import config
 from .summary import summary
 import logging
+import logging.handlers
 import sys
 import traceback
+import os
 
 logger = None
 
-def setup_logger():
+def setup_logger(parsed_args):
     global logger
 
-    logging.basicConfig(
-        format='%(asctime)s [%(levelname)s] %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
     logger = logging.getLogger('scsd')
+
+    format='%(asctime)s [%(levelname)s] %(message)s'
+    datefmt='%Y-%m-%d %H:%M:%S'
+    formatter = logging.Formatter(fmt=format, datefmt=datefmt)
+
+    sh = logging.StreamHandler()
+    fh = logging.handlers.RotatingFileHandler(
+        os.path.join(parsed_args['Required']['save_dir'], 'scsd.log'),
+        maxBytes=10485760, # 10MB
+        backupCount=5)
+    sh.setFormatter(formatter)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    logger.addHandler(sh)
+    logger.setLevel(args.args.convert_log_level(parsed_args['Log']['log_level']))
+
+    logger.info(f'scsd-{ver.__version__} started')
 
 def parse():
     parsed_args = args.args().parse(sys.argv[1:])
@@ -57,11 +73,9 @@ def __main__():
     notifier_ = None
 
     try:
-        setup_logger()
         parsed_args = parse()
+        setup_logger(parsed_args)
 
-        logger.setLevel(args.args.convert_log_level(parsed_args['Log']['log_level']))
-        logger.info(f'scsd-{ver.__version__} started')
         logger.debug(parsed_args)
 
         notifier_ = notifier.create_instance(
@@ -101,6 +115,7 @@ def add_new_game(db_, storage_, web_, game, file_infos, summary_):
     db_.add_requests_count(len(file_infos) + 1)
 
 def download_game_save(storage_, web_, game, file_info):
+    global logger
     logger.info(f"Downloading {file_info['filename']}")
     web_.download_game_save(
         file_info['link'],
@@ -114,6 +129,7 @@ def download_game_save(storage_, web_, game, file_info):
 Return true if updated
 '''
 def update_game(db_, storage_, web_, game, summary_):
+    global logger
     logger.info(f"Processing {game['name']}")
     file_infos = web_.get_game_save(game['link'])
 
@@ -156,6 +172,8 @@ def update_game(db_, storage_, web_, game, summary_):
     return
 
 def main(parsed_args, notifier_):
+    global logger
+
     summary_ = summary(int(parsed_args['Notifier']['level']))
     auth_ = auth(parsed_args['Required']['save_dir'])
 

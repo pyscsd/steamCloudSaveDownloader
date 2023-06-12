@@ -29,8 +29,6 @@ Disclaimer: Not affiliated with steam
 
 ### Remove DB in Storage Class
 
-### Detect not login page
-
 ### Daylight saving time
 
 ### Move to milestone
@@ -47,8 +45,10 @@ Disclaimer: Not affiliated with steam
 
 ### Support calling Shell script
 
-### Log to file and Rotate
-
 ### Support Mail
 
 ### Redacted TOkens, dir, appid etc.
+
+### Session Last about a month
+
+### DockerHub README
