@@ -37,10 +37,15 @@ jobs:
         with:
           name: dist
           path: dist/
-      - name: Download linux executable
+      - name: Download Linux executable
         uses: actions/download-artifact@v3
         with:
           name: linux_executable
+          path: dist/
+      - name: Download Windows executable
+        uses: actions/download-artifact@v3
+        with:
+          name: windows_executable
           path: dist/
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -49,6 +54,7 @@ jobs:
           files: |
             dist/*.whl
             dist/scsd_linux64
+            dist/scsd_windows_amd64.exe
   docker:
     needs:
       - publish
@@ -71,13 +77,12 @@ jobs:
         with:
           images: |
             hhhhojeihsu/scsd
-            # TODO ensure pypi is uploaded
       - name: Get Tag without v
         id: tag_v
         run: |
           echo 'version=${{ github.ref_name }}' | sed 's/=v/=/g' >> $GITHUB_OUTPUT
       - name: Wait until pypi availible
-        run: sleep 90
+        run: sleep 120
       - name: Docker Build and Push
         uses: docker/build-push-action@v4
         with:
