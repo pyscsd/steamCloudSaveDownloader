@@ -11,9 +11,7 @@ class args:
         self.parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-        # Config file has highest priority
-        group = self.parser.add_mutually_exclusive_group()
-        group.add_argument(
+        self.parser.add_argument(
             "-f",
             metavar="conf",
             dest="conf",
@@ -22,7 +20,7 @@ class args:
             help="Path to config file. If given, use the settings and ignore all command arguments"
         )
 
-        group.add_argument(
+        self.parser.add_argument(
             "-a",
             metavar="username",
             type=str,
@@ -78,8 +76,8 @@ class args:
         parsed_args = self.parser.parse_args(raw_args)
         if not (parsed_args.conf or parsed_args.auth or parsed_args.save_dir):
             self.parser.error("Either one of -a, -d or -f is required")
-        if (parsed_args.auth and not parsed_args.save_dir):
-            self.parser.error("`-d save_dir` is required by -a")
+        if (parsed_args.auth and not (parsed_args.save_dir or parsed_args.conf)):
+            self.parser.error("Either `-d save_dir` or `-f conf` is required by -a")
         return vars(parsed_args)
 
     def supported_notifier(self, arg):

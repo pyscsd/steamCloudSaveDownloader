@@ -42,17 +42,10 @@ def parse():
     parsed_args = args.args().parse(sys.argv[1:])
 
     if parsed_args['conf'] is not None:
-        parsed_args = config(parsed_args['conf']).get_conf()
+        parsed_args = \
+            config(parsed_args['conf'], auth=parsed_args['auth']).get_conf()
     else:
         parsed_args = config().load_from_arg(parsed_args)
-
-    if 'auth' in parsed_args and \
-            parsed_args['auth'] is not None and \
-            len(parsed_args['auth']) != 0:
-        auth_ = auth(parsed_args['Required']['save_dir'])
-        auth_.new_session(parsed_args['auth'])
-        exit(0)
-
 
     return parsed_args
 
@@ -176,6 +169,12 @@ def main(parsed_args, notifier_):
 
     summary_ = summary(int(parsed_args['Notifier']['level']))
     auth_ = auth(parsed_args['Required']['save_dir'])
+
+    if 'auth' in parsed_args and \
+            parsed_args['auth'] is not None and \
+            len(parsed_args['auth']) != 0:
+        auth_.new_session(parsed_args['auth'])
+        return
 
     session_pkl = auth_.get_session_path()
     web_ = web.web(session_pkl)
