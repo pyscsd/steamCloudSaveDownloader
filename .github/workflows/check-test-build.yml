@@ -6,10 +6,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: ["3.9"]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -19,40 +20,73 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           python -m pip install --upgrade pip
           pip install ruff pytest
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
           sudo apt-get install -y upx patchelf
+      - name: Install dependencies (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      - name: Install UPX (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: crazy-max/ghaction-upx@v2
+        with:
+          install-only: true
       - name: Lint with ruff
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           # stop the build if there are Python syntax errors or undefined names
           ruff --format=github --select=E9,F63,F7,F82 --target-version=py39 .
           # default set of ruff rules with GitHub Annotations
           ruff --format=github --target-version=py39 .
 
+      - name: Pack (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
+
+      - name: Pack (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_windows_amd64
+
       - name: Build
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           python -m build
 
-      - name: Pack
-        run: |
-          pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
       - name: Upload whl
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v3
         with:
           name: dist
           path: |
             dist/*.tar.gz
             dist/*.whl
+
       - name: Upload Linux Executable
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v3
         with:
           name: linux_executable
           path: |
             dist/scsd_linux64
+
+      - name: Upload Windows Executable
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows_executable
+          path: |
+            dist/scsd_windows_amd64.exe
+
       - name: Docker Build
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: docker/build-push-action@v4
         with:
           context: .
