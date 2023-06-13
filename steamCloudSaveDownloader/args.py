@@ -51,7 +51,7 @@ class args:
             metavar="rotation_count",
             dest="rotation",
             type=int,
-            default=config.Defaults['Rotation']['rotation'],
+            default=config.Defaults['Rotation']['rotation'][1],
             help="The amount of version for each file to keep"
         )
 
@@ -60,7 +60,7 @@ class args:
             metavar="log_level",
             dest="log_level",
             type=int,
-            default=config.Defaults['Log']['log_level'],
+            default=config.Defaults['Log']['log_level'][1],
             help="How detail should the log be"
         )
 
