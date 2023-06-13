@@ -52,3 +52,7 @@ Disclaimer: Not affiliated with steam
 ### Session Last about a month
 
 ### DockerHub README
+
+### Auth mode can combine with file mode
+
+### Dockerfile run shortcut for auth
