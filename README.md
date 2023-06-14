@@ -15,12 +15,9 @@ Disclaimer: Not affiliated with steam
 
 ### Running lock file to prevent re execute for cron
 
-### Windows/Mac Version
+### Mac Version
 
 ### External Scheduler
-
-### CI
-- Gen executable for linux/windows
 
 ### Misc
 - Banners
@@ -53,6 +50,10 @@ Disclaimer: Not affiliated with steam
 
 ### DockerHub README
 
-### Auth mode can combine with file mode
+### armhf Dockerfile
 
-### Dockerfile run shortcut for auth
+### docker hub doc
+
+### Windows Task Scheduler Tutorial
+
+### Check Default Log Level for -d mode

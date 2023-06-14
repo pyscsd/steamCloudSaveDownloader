@@ -13,6 +13,7 @@ RUN apk --no-cache add \
 
 COPY docker/entry.sh /root/entry.sh
 COPY docker/run.sh /opt/run.sh
+COPY docker/scsd_auth /usr/local/bin/scsd_auth
 
 VOLUME ["/data", "/config"]
 
