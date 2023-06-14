@@ -13,8 +13,6 @@ Disclaimer: Not affiliated with steam
 
 ### Show database mode
 
-### Running lock file to prevent re execute for cron
-
 ### Mac Version
 
 ### External Scheduler
@@ -32,13 +30,9 @@ Disclaimer: Not affiliated with steam
 
 ### Special thanks: beta tester
 
-### Windows Scheduler
-
 ### Unit tests
 
 ### Use file name + hashing instead of full path
-
-### Migrate to other method for workflow authentication
 
 ### Support calling Shell script
 
@@ -55,5 +49,3 @@ Disclaimer: Not affiliated with steam
 ### docker hub doc
 
 ### Windows Task Scheduler Tutorial
-
-### Check Default Log Level for -d mode

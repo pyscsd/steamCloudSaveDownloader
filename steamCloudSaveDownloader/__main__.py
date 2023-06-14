@@ -16,6 +16,8 @@ import os
 
 logger = None
 
+g_lock_file_name = ".scsd.lock"
+
 def setup_logger(parsed_args):
     global logger
 
@@ -65,6 +67,7 @@ def __main__():
 
     notifier_ = None
 
+    exit_num = 0
     try:
         parsed_args = parse()
         setup_logger(parsed_args)
@@ -75,18 +78,20 @@ def __main__():
             parsed_args['Notifier']['notifier'],
             **parsed_args['Notifier'])
 
+        create_lock_file(parsed_args['Required']['save_dir'])
         main(parsed_args, notifier_)
     except err.err as e:
         if notifier_:
             notifier_.send(e.get_msg(), False)
         e.log()
-        exit(e.num())
+        exit_num = e.num()
     except Exception:
         if notifier_:
             notifier_.send(f"\n```{traceback.format_exc()}```", False)
         print(traceback.format_exc())
-        exit(err.err_enum.UNKNOWN_EXCEPTION.value)
-    exit(0)
+        exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
+    delete_lock_file(parsed_args['Required']['save_dir'])
+    exit(exit_num)
 
 def add_new_game(db_, storage_, web_, game, file_infos, summary_):
     db_.add_new_game(game['app_id'], game['name'])
@@ -163,6 +168,21 @@ def update_game(db_, storage_, web_, game, summary_):
     db_.add_requests_count(requests_count)
 
     return
+
+def create_lock_file(path_):
+    lock_path = os.path.join(path_, g_lock_file_name)
+    if os.path.isfile(lock_path):
+        exception = err.err(err.err_enum.LOCKED)
+        exception.set_additional_info(f" (Path: {lock_path})")
+        raise exception
+
+    with open(lock_path, 'w') as f:
+        pass
+
+def delete_lock_file(path_):
+    lock_path = os.path.join(path_, g_lock_file_name)
+    if os.path.isfile(lock_path):
+        os.remove(lock_path)
 
 def main(parsed_args, notifier_):
     global logger

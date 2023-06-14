@@ -18,6 +18,7 @@ class err_enum(IntEnum):
     NO_SESSION = 11,
     CANNOT_REMOVE_OUTDATED = 12,
     REQUESTS_LIMIT_EXCEED = 13,
+    LOCKED = 14,
     UNKNOWN_EXCEPTION = 256
 
 ERR_INFO = {
@@ -72,6 +73,10 @@ ERR_INFO = {
     err_enum.REQUESTS_LIMIT_EXCEED: [
         logging.ERROR,
         "Request limit exceed. Please wait until another day"
+    ],
+    err_enum.LOCKED: [
+        logging.ERROR,
+        "Cannot create lock file. Please check if another instance is running or delete if program exit unexpectedly last time."
     ],
     err_enum.UNKNOWN_EXCEPTION: [
         logging.ERROR,
