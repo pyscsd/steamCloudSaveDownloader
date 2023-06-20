@@ -138,6 +138,13 @@ def update_game(db_, storage_, web_, game, summary_):
     requests_count = 1
     for file_info in file_infos:
         file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
+        if file_id is None:
+            logger.warning(f"Attempt to fix inconsistent DB for app={game['app_id']}, path={file_info['path']}, name={file_info['filename']}")
+            file_tuples = [(file_info['filename'],
+                            file_info['path'],
+                            game['app_id'],
+                            file_info['time'])]
+            db_.add_new_files(file_tuples)
         outdated, db_time = db_.is_file_outdated(file_id, file_info['time'])
         if (not outdated):
             logger.info(f"Ignore {file_info['filename']} (no change)")
