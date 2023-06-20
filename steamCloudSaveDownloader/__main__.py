@@ -139,38 +139,45 @@ def update_game(db_, storage_, web_, game, summary_):
     for file_info in file_infos:
         file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
         if file_id is None:
-            logger.warning(f"Attempt to fix inconsistent DB for app={game['app_id']}, path={file_info['path']}, name={file_info['filename']}")
             file_tuples = [(file_info['filename'],
                             file_info['path'],
                             game['app_id'],
                             file_info['time'])]
             db_.add_new_files(file_tuples)
-        outdated, db_time = db_.is_file_outdated(file_id, file_info['time'])
-        if (not outdated):
-            logger.info(f"Ignore {file_info['filename']} (no change)")
-            continue
+            logger.info(f"New file {file_info['filename']} added")
+            file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
+            download_game_save(storage_, web_, game, file_info)
+            summary_.add_game_file(
+                game['name'],
+                file_info['filename'],
+                None,
+                file_info['time'])
+        else:
+            outdated, db_time = db_.is_file_outdated(file_id, file_info['time'])
+            if (not outdated):
+                logger.info(f"Ignore {file_info['filename']} (no change)")
+                continue
+
+            storage_.rotate_file(
+                game['app_id'],
+                file_info['filename'],
+                file_info['path'],
+                file_id,
+                file_info['time'])
+            download_game_save(storage_, web_, game, file_info)
+            storage_.remove_outdated(
+                game['app_id'],
+                file_info['filename'],
+                file_info['path'],
+                file_id)
+            summary_.add_game_file(
+                game['name'],
+                file_info['filename'],
+                db_time,
+                file_info['time'])
 
         summary_.add_game(game['name'])
-
-        storage_.rotate_file(
-            game['app_id'],
-            file_info['filename'],
-            file_info['path'],
-            file_id,
-            file_info['time'])
-        download_game_save(storage_, web_, game, file_info)
         requests_count += 1
-        summary_.add_game_file(
-            game['name'],
-            file_info['filename'],
-            db_time,
-            file_info['time'])
-
-        storage_.remove_outdated(
-            game['app_id'],
-            file_info['filename'],
-            file_info['path'],
-            file_id)
 
     db_.add_requests_count(requests_count)
 
