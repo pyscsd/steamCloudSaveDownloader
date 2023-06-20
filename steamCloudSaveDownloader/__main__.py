@@ -147,6 +147,7 @@ def update_game(db_, storage_, web_, game, summary_):
             logger.info(f"New file {file_info['filename']} added")
             file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
             download_game_save(storage_, web_, game, file_info)
+            summary_.add_game(game['name'])
             summary_.add_game_file(
                 game['name'],
                 file_info['filename'],
@@ -170,13 +171,13 @@ def update_game(db_, storage_, web_, game, summary_):
                 file_info['filename'],
                 file_info['path'],
                 file_id)
+            summary_.add_game(game['name'])
             summary_.add_game_file(
                 game['name'],
                 file_info['filename'],
                 db_time,
                 file_info['time'])
 
-        summary_.add_game(game['name'])
         requests_count += 1
 
     db_.add_requests_count(requests_count)
