@@ -1,6 +1,8 @@
 from . import err
 from .err import err_enum
 from enum import IntEnum
+import datetime
+from zoneinfo import ZoneInfo
 
 g_truncate_max = 1000
 
@@ -38,6 +40,9 @@ class summary:
     def __init__(self, level:int):
         self.data = list()
         self.level = level
+        # Steam timezone is in PST
+        self.local_tz = datetime.datetime.now().astimezone().tzinfo
+        self.server_tz = ZoneInfo("America/Los_Angeles")
 
     def add_game(self, game_name:str):
         if len(self.data) != 0 and self.data[-1]['name'] == game_name:
@@ -57,7 +62,8 @@ class summary:
         def to_string(time):
             if time is None:
                 return None
-            return time.replace(tzinfo=None).isoformat(' ', 'minutes')
+
+            return time.replace(tzinfo=self.server_tz).astimezone(self.local_tz).replace(tzinfo=None).isoformat(' ', 'minutes')
 
         self.data[-1]['files'].append(
             {
