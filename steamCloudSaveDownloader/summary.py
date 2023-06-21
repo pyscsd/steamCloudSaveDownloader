@@ -57,7 +57,7 @@ class summary:
         def to_string(time):
             if time is None:
                 return None
-            return time.replace(tzinfo=None).isoformat(' ', 'seconds')
+            return time.replace(tzinfo=None).isoformat(' ', 'minutes')
 
         self.data[-1]['files'].append(
             {
