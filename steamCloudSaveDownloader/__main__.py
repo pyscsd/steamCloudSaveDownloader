@@ -156,7 +156,7 @@ def update_game(db_, storage_, web_, game, summary_):
         else:
             outdated, db_time = db_.is_file_outdated(file_id, file_info['time'])
             if (not outdated):
-                logger.info(f"Ignore {file_info['filename']} (no change)")
+                logger.debug(f"Ignore {file_info['filename']} (no change)")
                 continue
 
             storage_.rotate_file(
