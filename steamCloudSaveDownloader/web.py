@@ -7,15 +7,35 @@ import shutil
 import time
 import random
 import os
+import logging
 
 g_web_acc_link = "https://store.steampowered.com/account/?l=english"
 g_web_link = "https://store.steampowered.com/account/remotestorage/?l=english"
-g_random_sleep_interval = (1, 3)
+g_random_sleep_interval = (3, 5)
+g_retry_count = 3
+g_random_retry_interval = (15, 30)
 
-def random_sleep(func):
+logger = logging.getLogger('scsd')
+
+def random_sleep_and_retry(func):
     def wrapper(*args, **kwargs):
         time.sleep(random.randint(g_random_sleep_interval[0], g_random_sleep_interval[1]))
-        return func(*args, **kwargs)
+        exception = None
+        for i in range(g_retry_count):
+            try:
+                retval = func(*args, **kwargs)
+                return retval
+            except err.err as e:
+                exception = e
+                e.log()
+                sleep_interval = \
+                    random.randint(
+                        g_random_retry_interval[0],
+                        g_random_retry_interval[1])
+                time.sleep(sleep_interval)
+                logger.info(f'Retrying in {sleep_interval} seconds')
+        logger.error(f'Maximum attempt reached. Aborting')
+        raise exception
     return wrapper
 
 class web:
@@ -34,19 +54,19 @@ class web:
         response = self.session.get(g_web_acc_link)
 
     # Return list of {"Game": name, "Link", link}
-    @random_sleep
+    @random_sleep_and_retry
     def get_list(self):
         response = self.session.get(g_web_link)
         if (response.status_code != 200):
-            raise err(err_enum.ERR_CANNOT_RETRIEVE_LIST_MSG)
+            raise err.err(err_enum.CANNOT_RETRIEVE_LIST)
 
         return self.web_parser.parse_index(response.text)
 
-    @random_sleep
+    @random_sleep_and_retry
     def _get_game_save(self, game_link:str):
         response = self.session.get(game_link)
         if (response.status_code != 200):
-            err.err_enum(err_enum.CANNOT_RETRIEVE_GAME_FILES).log
+            err.err(err_enum.CANNOT_RETRIEVE_GAME_FILES).log()
             return (None, None)
 
         return self.web_parser.parse_game_file(response.text)
@@ -64,7 +84,7 @@ class web:
                 break
         return save_file_list
 
-    @random_sleep
+    @random_sleep_and_retry
     def download_game_save(self, link:str, store_location:str):
         with self.session.get(link, stream=True) as r:
             with open(store_location, 'wb') as f:

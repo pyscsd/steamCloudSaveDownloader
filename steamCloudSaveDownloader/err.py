@@ -24,7 +24,7 @@ class err_enum(IntEnum):
 ERR_INFO = {
     err_enum.CANNOT_RETRIEVE_LIST: [
         logging.ERROR,
-        "Cannot retrieve list from steam. Please make sure connected to Internet and cookie is valid."
+        "Cannot retrieve list from Steam. Please make sure connected to Internet."
     ],
     err_enum.CANNOT_PARSE_LIST: [
         logging.ERROR,
