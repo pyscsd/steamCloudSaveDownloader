@@ -88,10 +88,10 @@ class summary:
             return None
         if self.level == level_e.NONE:
             return None
-        text = "\nExecute summary:\n"
+        text = "Execute summary:\n"
 
         for game in self.data:
-            text += f"> - {game['name']}\n"
+            text += f"- {game['name']}\n"
 
             if (len(text) > g_truncate_max):
                 text += "Truncated...\n"
@@ -101,7 +101,7 @@ class summary:
                 continue
 
             for file in game['files']:
-                text += f">  - {file['filename']}"
+                text += f"  - {file['filename']}"
 
                 if (len(text) > g_truncate_max):
                     text += "\nTruncated...\n"
