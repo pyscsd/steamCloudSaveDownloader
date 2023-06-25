@@ -63,7 +63,14 @@ class summary:
             if time is None:
                 return None
 
-            return time.replace(tzinfo=self.server_tz).astimezone(self.local_tz).replace(tzinfo=None).isoformat(' ', 'minutes')
+            target_time = time.replace(tzinfo=self.server_tz).astimezone(self.local_tz).replace(tzinfo=None)
+
+            now = datetime.datetime.now()
+
+            if target_time.year == now.year:
+                return target_time.strftime("%m-%d %H:%M")
+            else:
+                return target_time.isoformat(' ', 'minutes')
 
         self.data[-1]['files'].append(
             {
