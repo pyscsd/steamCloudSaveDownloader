@@ -39,7 +39,7 @@ Even though this program does not use Steam API directly. This program still com
 In addition to that, the program will wait for a random amount of time (a few seconds) between each request. This will significantly lower chance for the program to be identified as DDoS attack and potentially ban your account. As a trade off, it might took awhile for all your cloud saves to be downloaded.
 
 ## Docker
-Docker image is available at [Docker Hub](https://hub.docker.com/repository/docker/hhhhojeihsu/scsd/general). It has built in scheduler and will run scsd automatically at given time (At minute 39 past every 2nd hour).
+Docker image is available at [Docker Hub](https://hub.docker.com/r/hhhhojeihsu/scsd). It has built in scheduler and will run scsd automatically at given time (At minute 39 past every 2nd hour).
 
 Below is the minimal example for running within docker. This will bind mount the `data` directory and run the authentication process.
 
