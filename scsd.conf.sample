@@ -1,7 +1,5 @@
 [Required]
-cookie_file = cookies-store-steampowered-com.txt
-#save_dir = ./data
-#save_dir =
+save_dir = ./data
 
 [Log]
 log_level = 2
@@ -10,5 +8,11 @@ log_level = 2
 rotation = 15
 
 [Notifier]
-#notifier = discord
-#webhook = https://discord.gg/some_webhook
+notifier = discord
+webhook = https://discord.gg/some_webhook
+notify_if_no_change = false
+level = 1
+
+[Target]
+mode = exclude
+list = 7, 12
