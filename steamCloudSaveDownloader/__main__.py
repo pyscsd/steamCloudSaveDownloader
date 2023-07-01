@@ -131,6 +131,11 @@ def update_game(db_, storage_, web_, game, summary_):
     logger.info(f"Processing {game['name']}")
     file_infos = web_.get_game_save(game['link'])
 
+    if file_infos is None:
+        logger.warning(f"Unable to retrieve {game['name']} file list. Skipped.")
+        return
+
+
     if (not db_.is_game_exist(game['app_id'])):
         add_new_game(db_, storage_, web_, game, file_infos, summary_)
         return

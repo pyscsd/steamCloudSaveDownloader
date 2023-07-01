@@ -79,6 +79,8 @@ class web:
         while True:
             partial_save_file_list, next_page_link = \
                 self._get_game_save(next_page_link)
+            if partial_save_file_list is None:
+                return None
             save_file_list += partial_save_file_list
             if next_page_link is None:
                 break
