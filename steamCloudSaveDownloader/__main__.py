@@ -86,9 +86,10 @@ def __main__():
         e.log()
         exit_num = e.num()
     except Exception:
+        ec = traceback.format_exc()
         if notifier_:
-            notifier_.send(f"\n```{traceback.format_exc()}```", False)
-        print(traceback.format_exc())
+            notifier_.send(f"\n```{ec}```", False)
+        logger.error(ec)
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
     delete_lock_file(parsed_args['Required']['save_dir'])
     exit(exit_num)
