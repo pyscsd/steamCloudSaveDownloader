@@ -80,13 +80,6 @@ class web_parser:
         return data
 
     def parse_game_file(self, content) -> tuple:
-        try:
-            return self._parse_game_file(content)
-        except err.err as e:
-            e.print()
-            exit(e.err_enum)
-
-    def _parse_game_file(self, content) -> tuple:
         soup = BeautifulSoup(content, 'html.parser')
 
         tbody = get_tbody(soup)
