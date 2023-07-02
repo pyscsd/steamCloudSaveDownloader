@@ -8,6 +8,8 @@ import logging
 
 logger = logging.getLogger('scsd')
 
+g_language_specifier = "l=english"
+
 def get_tbody(soup):
     main_content = soup.find(id='main_content')
 
@@ -74,7 +76,7 @@ class web_parser:
             cols = row.find_all('td')
             data.append({
                 "name": cols[0].text.strip(),
-                "link": cols[3].a['href'],
+                "link": f"{cols[3].a['href']}&{g_language_specifier}",
                 "app_id": get_appid(cols[3].a['href'])
             })
         return data

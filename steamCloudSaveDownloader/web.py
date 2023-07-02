@@ -9,8 +9,9 @@ import random
 import os
 import logging
 
-g_web_acc_link = "https://store.steampowered.com/account/?l=english"
-g_web_link = "https://store.steampowered.com/account/remotestorage/?l=english"
+g_language_specifier = "l=english"
+g_web_acc_link = f"https://store.steampowered.com/account/?{g_language_specifier}"
+g_web_link = f"https://store.steampowered.com/account/remotestorage/?{g_language_specifier}"
 g_random_sleep_interval = (3, 5)
 g_retry_count = 3
 g_random_retry_interval = (15, 30)
