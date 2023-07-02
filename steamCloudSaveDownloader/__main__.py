@@ -91,7 +91,8 @@ def __main__():
             notifier_.send(f"\n```{ec}```", False)
         logger.error(ec)
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
-    delete_lock_file(parsed_args['Required']['save_dir'])
+    if exit_num != err.err_enum.LOCKED.value:
+        delete_lock_file(parsed_args['Required']['save_dir'])
     exit(exit_num)
 
 def add_new_game(db_, storage_, web_, game, file_infos, summary_):
