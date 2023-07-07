@@ -4,12 +4,14 @@ from .err import err_enum
 from . import ver
 import logging
 from discord_webhook import DiscordWebhook
+import subprocess
 
 logger = logging.getLogger(__name__)
 
 class notify_method(Enum):
     Nop = 0
     Discord = 1
+    Script = 2
 
 class notifier:
 
@@ -17,12 +19,16 @@ class notifier:
     Method: Nop (Do nothing)
     Method: Discord
         Required: webhook
+    Method: Script
+        Required: path
     '''
     instance = None
 
     def get_enum(name:str):
         if name.lower() == 'discord':
             return notify_method.Discord
+        elif name.lower() == 'script':
+            return notify_method.Script
         else:
             return notify_method.Nop
 
@@ -55,12 +61,22 @@ class notifier:
             if len(self.webhook) == 0:
                 logger.error(err.get_msg(err_enum.INVALID_WEBHOOK_URL))
                 exit(1)
+        elif (self.method == notify_method.Script):
+            assert 'path' in kwargs, 'Script method requires path'
+            self.path = kwargs['path']
+
+            if len(self.path) == 0:
+                logger.error('"Script" notification method requires "path"')
+                exit(1)
         else:
             assert False, 'Unsupported notifier method'
 
     def discord_send(self, msg:str):
         webhook = DiscordWebhook(url=self.webhook, content=msg)
         webhook = webhook.execute()
+
+    def script_send(self, msg:str):
+        subprocess.run([self.path, msg])
 
     def send(self, msg:str, ok:bool):
         actual_msg = f'[scsd-{ver.__version__}] '
@@ -73,5 +89,7 @@ class notifier:
             return
         elif self.method == notify_method.Discord:
             self.discord_send(actual_msg)
+        elif self.method == notify_method.Script:
+            self.script_send(actual_msg)
         else:
             assert False

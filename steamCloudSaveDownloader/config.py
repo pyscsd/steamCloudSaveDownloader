@@ -19,6 +19,7 @@ Defaults = {
         "notify_if_no_change": (bool, False),
         "notifier": (str, ""),
         "webhook": (str, ""),
+        "path": (str, ""),
         "level": (int, 1)
     },
     'Target': {
