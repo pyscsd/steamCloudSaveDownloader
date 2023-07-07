@@ -32,6 +32,7 @@ By running `scsd -a <username>` scsd save a session file with NO password within
 ## Notification
 Right now scsd supports the following notification system whenever scsd finishes the download process or encountered error. Please refer to [Config File](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Config-File) for setting options
 - Discord
+- Script
 
 ## Rate Limit
 Even though this program does not use Steam API directly. This program still complies to Steam maximum API calls limit (100,000) per day. This program will limit itself to 85% of the usage (which is 85,000). Once exceed the aforementioned limit, the program will stop sending requests to Steam.
