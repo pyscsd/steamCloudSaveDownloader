@@ -17,7 +17,7 @@ class args:
             dest="conf",
             type=self.is_file,
             default="",
-            help="Path to config file. If given, use the settings and ignore all command arguments"
+            help="Path to config file. If given, use the settings and the command arguments will override if same option is specified as well"
         )
 
         self.parser.add_argument(
