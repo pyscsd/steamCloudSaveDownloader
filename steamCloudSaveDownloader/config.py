@@ -6,7 +6,8 @@ from .err import err_enum
 from .notifier import notifier, notify_method
 
 Defaults = {
-    'Required': {
+    'General': {
+        "save_dir": (str, "./data")
     },
     'Rotation': {
         "rotation": (int, 15)
@@ -83,14 +84,6 @@ class config:
         self.parsed[p_section][p_entry] = \
             self.type_convert(tup[0], tup[1])
 
-    def parse_required(self):
-        if 'Required' not in self.parser:
-            self.raise_err("No [Required] section found")
-        required = self.parser['Required']
-
-        self.check_and_raise(required, 'save_dir')
-        self.parsed['Required']['save_dir'] = self.is_path(required['save_dir'])
-
     def parse_optional_section(self, p_section:str):
         if self.parser is not None and p_section in self.parser:
             section = self.parser[p_section]
@@ -104,6 +97,9 @@ class config:
                     self.type_convert(type_, section[entry])
             else:
                 self.load_default(p_section, entry)
+
+    def parse_general(self):
+        self.parse_optional_section('General')
 
     def parse_log(self):
         self.parse_optional_section('Log')
@@ -126,7 +122,7 @@ class config:
         self.parsed['Target']['list'] = self.delimit_list(self.parsed['Target']['list'])
 
     def get_conf(self):
-        self.parse_required()
+        self.parse_general()
         self.parse_log()
         self.parse_rotation()
         self.parse_notifier()
@@ -134,7 +130,8 @@ class config:
         return self.parsed
 
     def load_from_arg(self, parsed_args:dict):
-        self.parsed['Required']['save_dir'] = parsed_args['save_dir']
+        self.parse_general()
+        self.parsed['General']['save_dir'] = parsed_args['save_dir']
         self.parse_log()
         self.parsed['Log']['log_level'] = parsed_args['log_level']
         self.parse_rotation()

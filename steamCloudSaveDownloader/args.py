@@ -40,7 +40,8 @@ class args:
             "-d",
             metavar="save_dir",
             dest="save_dir",
-            type=self.is_path,
+            type=str,
+            default=config.Defaults['General']['save_dir'][1],
             help="Directory to save the downloaded saves and db"
         )
 
@@ -74,10 +75,6 @@ class args:
 
     def parse(self, raw_args):
         parsed_args = self.parser.parse_args(raw_args)
-        if not (parsed_args.conf or parsed_args.auth or parsed_args.save_dir):
-            self.parser.error("Either one of -a, -d or -f is required")
-        if (parsed_args.auth and not (parsed_args.save_dir or parsed_args.conf)):
-            self.parser.error("Either `-d save_dir` or `-f conf` is required by -a")
         return vars(parsed_args)
 
     def supported_notifier(self, arg):

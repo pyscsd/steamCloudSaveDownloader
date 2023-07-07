@@ -1,4 +1,4 @@
-[Required]
+[General]
 save_dir = ./data
 
 [Log]

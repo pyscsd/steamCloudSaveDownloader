@@ -64,7 +64,7 @@ ERR_INFO = {
     ],
     err_enum.NO_SESSION: [
         logging.ERROR,
-        "No session found. Please re-run the program with -a <username> -d <data_dir> first"
+        "No session found. Please re-run the program with -a <username> first"
     ],
     err_enum.CANNOT_REMOVE_OUTDATED: [
         logging.WARNING,

@@ -29,7 +29,7 @@ def setup_logger(parsed_args):
 
     sh = logging.StreamHandler()
     fh = logging.handlers.RotatingFileHandler(
-        os.path.join(parsed_args['Required']['save_dir'], 'scsd.log'),
+        os.path.join(parsed_args['General']['save_dir'], 'scsd.log'),
         maxBytes=10485760, # 10MB
         backupCount=5)
     sh.setFormatter(formatter)
@@ -70,6 +70,10 @@ def __main__():
     exit_num = 0
     try:
         parsed_args = parse()
+
+        if not os.path.exists(parsed_args['General']['save_dir']):
+            os.makedirs(parsed_args['General']['save_dir'])
+
         setup_logger(parsed_args)
 
         logger.debug(parsed_args)
@@ -78,7 +82,7 @@ def __main__():
             parsed_args['Notifier']['notifier'],
             **parsed_args['Notifier'])
 
-        create_lock_file(parsed_args['Required']['save_dir'])
+        create_lock_file(parsed_args['General']['save_dir'])
         main(parsed_args, notifier_)
     except err.err as e:
         if notifier_:
@@ -92,7 +96,7 @@ def __main__():
         logger.error(ec)
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
     if exit_num != err.err_enum.LOCKED.value:
-        delete_lock_file(parsed_args['Required']['save_dir'])
+        delete_lock_file(parsed_args['General']['save_dir'])
     exit(exit_num)
 
 def add_new_game(db_, storage_, web_, game, file_infos, summary_):
@@ -210,7 +214,7 @@ def main(parsed_args, notifier_):
     global logger
 
     summary_ = summary(int(parsed_args['Notifier']['level']))
-    auth_ = auth(parsed_args['Required']['save_dir'])
+    auth_ = auth(parsed_args['General']['save_dir'])
 
     if 'auth' in parsed_args and \
             parsed_args['auth'] is not None and \
@@ -221,9 +225,9 @@ def main(parsed_args, notifier_):
     session_pkl = auth_.get_session_path()
     web_ = web.web(session_pkl)
 
-    db_ = db.db(parsed_args['Required']['save_dir'],
+    db_ = db.db(parsed_args['General']['save_dir'],
                 parsed_args['Rotation']['rotation'])
-    storage_ = storage.storage(parsed_args['Required']['save_dir'], db_)
+    storage_ = storage.storage(parsed_args['General']['save_dir'], db_)
 
     game_list = web_.get_list()
 
