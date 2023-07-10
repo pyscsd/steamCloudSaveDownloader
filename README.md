@@ -5,7 +5,7 @@ Download/Backup Saves on Steam Cloud
 
 ## :warning: DISCLAIMER
 - This program is not affiliated with Valve or Steam. Steam is a trademark of Valve Corporation.
-- Even though this program is thoroughly tested and theoretically does not violate EULA. This program does not come with warranty and use at your own risk. More of this on Rate Limit Section(#Rate Limit)
+- Even though this program is thoroughly tested and theoretically does not violate EULA. This program does not come with warranty and use at your own risk. More of this on [Rate Limit Section](#Rate Limit)
 
 ## Description
 For supported games, Steam will automatically upload game saves to the cloud. This is intended for seamless playing across multiple devices but NOT as a form of backup. Assume your game save is corrupted by the game itself or you perform something cannot be undone. Once you close the game Steam will automatically uploads newest(corrupted) game saves to the cloud. That is basically game over if you haven't backup your save or unplug your Internet cord before you close the game. This is when steamCloudSaveDownloader(abbreviated as scsd) come to the rescue.
@@ -74,3 +74,5 @@ docker exec -it scsd scsd_auth <username>
 |PGID        |Effective GID for scsd to run with|1000|
 |CRON_VAR    |Cron syntax for scheduled run|39 */2 * * *|
 |AUTO_UPDATE |Set to `true` to enable scsd auto update|false|
+
+## Special Thanks
