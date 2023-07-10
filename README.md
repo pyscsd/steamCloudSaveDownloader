@@ -5,7 +5,7 @@ Download/Backup Saves on Steam Cloud
 
 ## :warning: DISCLAIMER
 - This program is not affiliated with Valve or Steam. Steam is a trademark of Valve Corporation.
-- Even though this program is thoroughly tested and theoretically does not violate EULA. This program does not come with warranty and use at your own risk. More of this on [Rate Limit Section](#Rate Limit)
+- Even though this program is thoroughly tested and theoretically does not violate EULA. This program does not come with warranty and use at your own risk. More of this on [Rate Limit Section](#Rate-Limit)
 
 ## Description
 For supported games, Steam will automatically upload game saves to the cloud. This is intended for seamless playing across multiple devices but NOT as a form of backup. Assume your game save is corrupted by the game itself or you perform something cannot be undone. Once you close the game Steam will automatically uploads newest(corrupted) game saves to the cloud. That is basically game over if you haven't backup your save or unplug your Internet cord before you close the game. This is when steamCloudSaveDownloader(abbreviated as scsd) come to the rescue.
@@ -15,7 +15,7 @@ You can view and download your save files stored on Steam cloud [here](https://s
 ## :warning: Limitation
 - If the game does not support Steam Cloud then the file cannot be backuped. You should look for alternatives like [GameSave Manager](https://www.gamesave-manager.com/)
 - File will be uploaded to Steam Cloud **after** you close the game. If the game save modification happens between a long game session without closing the game. Your last save point would be the last save uploaded to Steam Cloud and downloaded by scsd.
-- You might want to increase the frequency of scsd run if you have multiple short gaming session. Please be aware of [Rate Limit](#Rate Limit) and set an acceptable frequency in this case.
+- You might want to increase the frequency of scsd run if you have multiple short gaming session. Please be aware of [Rate Limit](#Rate-Limit) and set an acceptable frequency in this case.
 
 ## Installation
 This program is available on [PyPI](https://pypi.org/project/scsd/). All you have to do is install [Python](https://www.python.org/downloads/) and run.
@@ -29,7 +29,7 @@ Linux and Windows executable can also be found on the [release page](https://git
 ## Usage
 Simply run `scsd -a <username>` to [login to Steam](#Authentication). Then run `scsd` to start downloading saves. The saves for each game will be stored within the `data` directory with the corresponding [AppID](https://steamdb.info/apps/). If rotation is specified the old version of the file will have suffix `.scsd_<version_num>` to the corresponding file name.
 
-Please refer to [Scheduled Run](#Scheduled Run) if you want to run scsd automatically at given time.
+Please refer to [Scheduled Run](#Scheduled-Run) if you want to run scsd automatically at given time.
 
 For more detail usages please reference [Command Arguments](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Command-Arguments) and [Config File](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Config-File)
 
