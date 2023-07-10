@@ -97,7 +97,7 @@ def __main__():
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
     if exit_num != err.err_enum.LOCKED.value:
         delete_lock_file(parsed_args['General']['save_dir'])
-    exit(exit_num)
+    sys.exit(exit_num)
 
 def add_new_game(db_, storage_, web_, game, file_infos, summary_):
     db_.add_new_game(game['app_id'], game['name'])

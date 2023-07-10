@@ -59,15 +59,13 @@ class notifier:
             self.webhook = kwargs['webhook']
 
             if len(self.webhook) == 0:
-                logger.error(err.get_msg(err_enum.INVALID_WEBHOOK_URL))
-                exit(1)
+                raise(err(err_enum.INVALID_WEBHOOK_URL))
         elif (self.method == notify_method.Script):
             assert 'path' in kwargs, 'Script method requires path'
             self.path = kwargs['path']
 
             if len(self.path) == 0:
-                logger.error('"Script" notification method requires "path"')
-                exit(1)
+                raise(err(err_enum.INVALID_SCRIPT_PATH))
         else:
             assert False, 'Unsupported notifier method'
 
