@@ -12,6 +12,11 @@ For supported games, Steam will automatically upload game saves to the cloud. Th
 
 You can view and download your save files stored on Steam cloud [here](https://store.steampowered.com/account/remotestorage). This program automatically crawls the webpages and download if the files are outdated. A number of copies are kept locally in case something goes wrong. You can rollback your saves whenever anything goes wrong.
 
+## :warning: Limitation
+- If the game does not support Steam Cloud then the file cannot be backuped. You should look for alternatives like [GameSave Manager](https://www.gamesave-manager.com/)
+- File will be uploaded to Steam Cloud **after** you close the game. If the game save modification happens between a long game session without closing the game. Your last save point would be the last save uploaded to Steam Cloud and downloaded by scsd.
+- You might want to increase the frequency of scsd run if you have multiple short gaming session. Please be aware of [Rate Limit](#Rate Limit) and set an acceptable frequency in this case.
+
 ## Installation
 This program is available on [PyPI](https://pypi.org/project/scsd/). All you have to do is install [Python](https://www.python.org/downloads/) and run.
 
@@ -22,7 +27,9 @@ pip install scsd
 Linux and Windows executable can also be found on the [release page](https://github.com/pyscsd/steamCloudSaveDownloader/releases)
 
 ## Usage
-Simply run `scsd -a <username>` to login to Steam. Then run `scsd` to start downloading saves. The saves for each game will be stored within the `data` directory with the corresponding [AppID](https://steamdb.info/apps/). If rotation is specified the old version of the file will have suffix `.scsd_<version_num>` to the corresponding file name.
+Simply run `scsd -a <username>` to [login to Steam](#Authentication). Then run `scsd` to start downloading saves. The saves for each game will be stored within the `data` directory with the corresponding [AppID](https://steamdb.info/apps/). If rotation is specified the old version of the file will have suffix `.scsd_<version_num>` to the corresponding file name.
+
+Please refer to [Scheduled Run](#Scheduled Run) if you want to run scsd automatically at given time.
 
 For more detail usages please reference [Command Arguments](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Command-Arguments) and [Config File](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Config-File)
 
@@ -33,6 +40,12 @@ By running `scsd -a <username>` scsd save a session file with NO password within
 Right now scsd supports the following notification system whenever scsd finishes the download process or encountered error. Please refer to [Config File](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Config-File) for setting options
 - Discord
 - Script
+
+## Scheduled Run
+The saves will be download and saved locally only if you execute scsd. scsd relies on external scheduler to run automatically.
+
+- For Windows users you can run it with [Task Scheduler](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Windows-Task-Scheduler.md)
+- For Linux/Mac users you can run it with [cron](https://wiki.archlinux.org/title/cron)
 
 ## Rate Limit
 Even though this program does not use Steam API directly. This program still complies to Steam maximum API calls limit (100,000) per day. This program will limit itself to 85% of the usage (which is 85,000). Once exceed the aforementioned limit, the program will stop sending requests to Steam.
