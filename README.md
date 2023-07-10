@@ -44,7 +44,7 @@ Right now scsd supports the following notification system whenever scsd finishes
 ## Scheduled Run
 The saves will be download and saved locally only if you execute scsd. scsd relies on external scheduler to run automatically.
 
-- For Windows users you can run it with [Task Scheduler](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Windows-Task-Scheduler.md)
+- For Windows users you can run it with [Task Scheduler](https://github.com/pyscsd/steamCloudSaveDownloader/wiki/Windows-Task-Scheduler)
 - For Linux/Mac users you can run it with [cron](https://wiki.archlinux.org/title/cron)
 
 ## Rate Limit
