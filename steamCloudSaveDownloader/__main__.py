@@ -62,6 +62,10 @@ def should_process_appid(p_target:dict(), p_input:int) -> bool:
 
     return True
 
+def get_overall_target_counts(p_target:dict, p_game_list:list) -> int:
+    return len([game for game in p_game_list if should_process_appid(p_target, game['app_id'])])
+
+
 def __main__():
     global logger
 
@@ -134,7 +138,6 @@ Return true if updated
 '''
 def update_game(db_, storage_, web_, game, summary_):
     global logger
-    logger.info(f"Processing {game['name']}")
     file_infos = web_.get_game_save(game['link'])
 
     if file_infos is None:
@@ -231,6 +234,10 @@ def main(parsed_args, notifier_):
 
     game_list = web_.get_list()
 
+    target_count = get_overall_target_counts(parsed_args['Target'], game_list)
+
+    current_game_index = 1
+
     for game in game_list:
         if db_.is_requests_limit_exceed():
             raise err.err(err.err_enum.REQUESTS_LIMIT_EXCEED)
@@ -238,6 +245,8 @@ def main(parsed_args, notifier_):
             logger.debug(f"Ignoring {game['name']} ({game['app_id']})")
             continue
 
+        logger.info(f"({current_game_index}/{target_count}) Processing {game['name']}")
+        current_game_index += 1
         update_game(db_, storage_, web_, game, summary_)
 
     if summary_.has_changes():
