@@ -24,6 +24,7 @@ class auth:
         with open(self.get_session_path(), 'wb') as f:
             pickle.dump(self.session.cookies, f)
         os.umask(prev_umask)
+        print("Login success. Please rerun scsd to start downloading")
 
     def get_session_path(self):
         return os.path.join(self.data_dir, auth.s_session_filename)
