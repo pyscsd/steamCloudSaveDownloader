@@ -45,15 +45,25 @@ jobs:
           # default set of ruff rules with GitHub Annotations
           ruff --format=github --target-version=py39 .
 
+      - name: Get Tag Version
+        if: startsWith(github.ref, 'refs/tags')
+        run: |
+          echo '${{ github.ref_name }}' > version.txt
+
+      - name: Get Commit Version
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+        run: |
+          echo '${GITHUB_SHA:0:6}' > version.txt
+
       - name: Pack (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
+          pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
 
       - name: Pack (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          pyinstaller --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_windows_amd64
+          pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_windows_amd64
 
       - name: Build
         if: ${{ matrix.os == 'ubuntu-latest' }}
