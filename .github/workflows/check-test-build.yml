@@ -17,6 +17,7 @@ jobs:
         run: |
           echo 'version=${{ github.ref_name }}' >> $GITHUB_OUTPUT
       - name: Get commit version
+        run: |
           echo 'version=${GITHUB_SHA:0:6}' >> $GITHUB_OUTPUT
 
   build:
