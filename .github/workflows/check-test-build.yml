@@ -7,6 +7,8 @@ on:
 jobs:
   get_version:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -18,7 +20,8 @@ jobs:
           echo 'version=${{ github.ref_name }}' >> $GITHUB_OUTPUT
       - name: Get commit version
         run: |
-          echo 'version=${GITHUB_SHA:0:6}' >> $GITHUB_OUTPUT
+          env
+          echo "version=${GITHUB_SHA:0:6}" >> $GITHUB_OUTPUT
 
   build:
     needs:
@@ -65,13 +68,13 @@ jobs:
       - name: Pack (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          echo '${{ steps.get_version.outputs.version }}' >> version.txt
+          echo '${{ needs.get_version.outputs.version }}' >> version.txt
           pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
 
       - name: Pack (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          Write-Output ${{ steps.get_version.outputs.version }} > version.txt
+          Write-Output ${{ needs.get_version.outputs.version }} > version.txt
           pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_windows_amd64
 
       - name: Build
