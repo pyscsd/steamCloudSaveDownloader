@@ -22,6 +22,8 @@ jobs:
         run: |
           env
           echo "version=${GITHUB_SHA:0:6}" >> $GITHUB_OUTPUT
+          echo "version_test=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "$GITHUB_OUTPUT"
 
   build:
     needs:
