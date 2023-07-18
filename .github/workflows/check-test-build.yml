@@ -7,8 +7,6 @@ on:
 jobs:
   get_version:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -21,6 +19,8 @@ jobs:
       - name: Get commit version
         run: |
           echo "version=${GITHUB_SHA:0:6}" >> $GITHUB_OUTPUT
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
 
   build:
     needs:
