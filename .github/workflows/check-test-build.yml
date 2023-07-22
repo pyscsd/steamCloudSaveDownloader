@@ -15,12 +15,16 @@ jobs:
         id: get_version
         if: startsWith(github.ref, 'refs/tags')
         run: |
-          echo 'version=${{ github.ref_name }}' >> $GITHUB_OUTPUT
+          echo '${{ github.ref_name }}' >> version.txt
       - name: Get commit version
         run: |
-          echo "version=${GITHUB_SHA:0:6}" >> $GITHUB_OUTPUT
-    outputs:
-      version: ${{ steps.get_version.outputs.version }}
+          echo "${GITHUB_SHA:0:6}" >> version.txt
+      - name: Upload version.txt
+        uses: actions/upload-artifact@v3
+        with:
+          name: version.txt
+          path: |
+            version.txt
 
   build:
     needs:
@@ -63,25 +67,20 @@ jobs:
           ruff --format=github --select=E9,F63,F7,F82 --target-version=py39 .
           # default set of ruff rules with GitHub Annotations
           ruff --format=github --target-version=py39 .
+      - name: Download version.txt
+        uses: actions/download-artifact@v3
+        with:
+          name: version.txt
+          path: version.txt
 
       - name: Pack (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          echo '---'
-          echo '${{ toJSON(needs) }}'
-          echo '---'
-          echo '${{ toJSON(needs.get_version) }}'
-          echo '---'
-          echo '${{ toJSON(needs.get_version.outputs) }}'
-          echo '---'
-          echo '${{ toJSON(needs.get_version.outputs.version) }}'
-          echo '${{ needs.get_version.outputs.version }}' >> version.txt
           pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
 
       - name: Pack (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          Write-Output ${{ needs.get_version.outputs.version }} > version.txt
           pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_windows_amd64
 
       - name: Build
