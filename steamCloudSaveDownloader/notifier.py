@@ -5,6 +5,7 @@ from . import ver
 import logging
 from discord_webhook import DiscordWebhook
 import subprocess
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class notifier:
             assert 'path' in kwargs, 'Script method requires path'
             self.path = kwargs['path']
 
-            if len(self.path) == 0:
+            if len(self.path) == 0 or not os.path.isfile(self.path):
                 raise(err(err_enum.INVALID_SCRIPT_PATH))
         else:
             assert False, 'Unsupported notifier method'
@@ -74,20 +75,28 @@ class notifier:
         webhook = webhook.execute()
 
     def script_send(self, msg:str):
-        subprocess.run([self.path, msg])
+        try:
+            subprocess.run([self.path, msg])
+        except FileNotFoundError:
+            raise(err(err_enum.INVALID_SCRIPT_PATH))
 
-    def send(self, msg:str, ok:bool):
+    def send(self, msg:str, ok:bool) -> bool:
         actual_msg = f'[scsd-{ver.__version__}] '
         if ok:
             actual_msg += ":white_check_mark: "
         else:
             actual_msg += ":x: "
         actual_msg += f' {msg}'
-        if self.method == notify_method.Nop:
-            return
-        elif self.method == notify_method.Discord:
-            self.discord_send(actual_msg)
-        elif self.method == notify_method.Script:
-            self.script_send(actual_msg)
-        else:
-            assert False
+        try:
+            if self.method == notify_method.Nop:
+                pass
+            elif self.method == notify_method.Discord:
+                self.discord_send(actual_msg)
+            elif self.method == notify_method.Script:
+                self.script_send(actual_msg)
+            else:
+                assert False
+            return True
+        except Exception as e:
+            self.exception = e
+            return False

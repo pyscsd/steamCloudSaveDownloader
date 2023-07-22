@@ -19,6 +19,7 @@ class err_enum(IntEnum):
     CANNOT_REMOVE_OUTDATED = 12,
     REQUESTS_LIMIT_EXCEED = 13,
     LOCKED = 14,
+    INVALID_SCRIPT_PATH = 15,
     UNKNOWN_EXCEPTION = 256
 
 ERR_INFO = {
@@ -77,6 +78,10 @@ ERR_INFO = {
     err_enum.LOCKED: [
         logging.ERROR,
         "Cannot create lock file. Please check if another instance is running or delete if program exit unexpectedly last time."
+    ],
+    err_enum.INVALID_SCRIPT_PATH: [
+        logging.ERROR,
+        "Invalid script path. The script file does not exist or insufficient permission."
     ],
     err_enum.UNKNOWN_EXCEPTION: [
         logging.ERROR,

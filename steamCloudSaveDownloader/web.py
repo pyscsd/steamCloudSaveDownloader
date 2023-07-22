@@ -33,8 +33,8 @@ def random_sleep_and_retry(func):
                     random.randint(
                         g_random_retry_interval[0],
                         g_random_retry_interval[1])
-                time.sleep(sleep_interval)
                 logger.info(f'Retrying in {sleep_interval} seconds')
+                time.sleep(sleep_interval)
         logger.error(f'Maximum attempt reached. Aborting')
         raise exception
     return wrapper

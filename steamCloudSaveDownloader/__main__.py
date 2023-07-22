@@ -90,13 +90,17 @@ def __main__():
         main(parsed_args, notifier_)
     except err.err as e:
         if notifier_:
-            notifier_.send(e.get_msg(), False)
+            if not notifier_.send(e.get_msg(), False):
+                logger.warning("Notifier not working as intended. Exception:")
+                logger.warning(notifier_.exception)
         e.log()
         exit_num = e.num()
     except Exception:
         ec = traceback.format_exc()
         if notifier_:
-            notifier_.send(f"\n```{ec}```", False)
+            if not notifier_.send(f"\n```{ec}```", False):
+                logger.warning("Notifier not working as intended. Exception:")
+                logger.warning(notifier_.exception)
         logger.error(ec)
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
     if exit_num != err.err_enum.LOCKED.value:
