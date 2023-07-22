@@ -2,8 +2,6 @@ name: check-test-build
 
 on:
   push:
-    tags-ignore:
-    - 'v*'
   workflow_call:
 
 jobs:
