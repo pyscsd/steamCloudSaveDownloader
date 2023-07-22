@@ -2,6 +2,8 @@ name: check-test-build
 
 on:
   push:
+    tags-ignore:
+    - 'v*'
   workflow_call:
 
 jobs:
@@ -49,7 +51,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff pytest
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-          sudo apt-get install -y upx patchelf
+          sudo apt-get install -y patchelf
       - name: Install dependencies (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
@@ -76,7 +78,7 @@ jobs:
       - name: Pack (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name "scsd_$(cat ./version.txt)_linux_amd64"
+          pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name "scsd_$(cat ./version.txt | tr -d '\n')_linux_amd64"
 
       - name: Pack (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
