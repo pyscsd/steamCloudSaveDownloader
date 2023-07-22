@@ -71,7 +71,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: version.txt
-          path: version.txt
+          path: .
 
       - name: Pack (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -81,7 +81,7 @@ jobs:
       - name: Pack (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          $version_raw = Get-Content version.txt -Raw
+          $version_raw = Get-Content ./version.txt -Raw
           $version = $version_raw -replace "`n",""  -replace "`r",""
           $filename = "scsd_${version}_windows_amd64.exe"
           pyinstaller --add-data "version.txt;." --collect-all steamCloudSaveDownloader --onefile ./scsd --name $filename
