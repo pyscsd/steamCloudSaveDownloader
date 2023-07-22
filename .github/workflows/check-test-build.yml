@@ -76,12 +76,15 @@ jobs:
       - name: Pack (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_linux64
+          pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name "scsd_$(cat ./version.txt)_linux_amd64"
 
       - name: Pack (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          pyinstaller --add-data "version.txt;." --collect-all steamCloudSaveDownloader --onefile ./scsd --name scsd_windows_amd64
+          $version_raw = Get-Content version.txt -Raw
+          $version = $version_raw -replace "`n",""  -replace "`r",""
+          $filename = "scsd_${version}_windows_amd64.exe"
+          pyinstaller --add-data "version.txt;." --collect-all steamCloudSaveDownloader --onefile ./scsd --name $filename
 
       - name: Build
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -103,7 +106,7 @@ jobs:
         with:
           name: linux_executable
           path: |
-            dist/scsd_linux64
+            dist/scsd_*_linux_amd64
 
       - name: Upload Windows Executable
         if: ${{ matrix.os == 'windows-latest' }}
@@ -111,7 +114,7 @@ jobs:
         with:
           name: windows_executable
           path: |
-            dist/scsd_windows_amd64.exe
+            dist/scsd_*_windows_amd64.exe
 
       - name: Docker Build
         if: ${{ matrix.os == 'ubuntu-latest' }}

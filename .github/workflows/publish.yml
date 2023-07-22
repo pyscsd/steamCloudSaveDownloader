@@ -53,8 +53,8 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             dist/*.whl
-            dist/scsd_linux64
-            dist/scsd_windows_amd64.exe
+            dist/scsd_*_linux_amd64
+            dist/scsd_*_windows_amd64.exe
   docker:
     needs:
       - publish
