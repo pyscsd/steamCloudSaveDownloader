@@ -33,7 +33,9 @@ count (int)
 
 
 '''
+
 logger = logging.getLogger('scsd')
+
 class db:
     requests_limit = 85000
     def __init__(self, db_location:str, rotation:int):

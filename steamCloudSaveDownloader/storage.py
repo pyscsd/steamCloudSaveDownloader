@@ -5,8 +5,30 @@ from . import err
 from .err import err_enum
 import datetime
 import logging
+import signal
 
 logger = logging.getLogger('scsd')
+
+class keyboard_interrupt_handler:
+    def __enter__(self):
+        self.signal_received = False
+        self.old_handler = signal.signal(signal.SIGINT, self.handler)
+
+    def handler(self, sig, frame):
+        self.signal_received = (sig, frame)
+        logger.warning('SIGINT received. Delaying to ensure consistency.')
+
+    def __exit__(self, type, value, traceback):
+        signal.signal(signal.SIGINT, self.old_handler)
+        if self.signal_received:
+            self.old_handler(*self.signal_received)
+
+def key_interrupt_atomic(func):
+    def wrapper(*args, **kwargs):
+        with keyboard_interrupt_handler():
+            retval = func(*args, **kwargs)
+        return retval
+    return wrapper
 
 class storage:
     s_version_prefix = '.scsd_'
@@ -77,6 +99,7 @@ class storage:
 
         return os.path.join(path_to_save, filename + version_suffix)
 
+    @key_interrupt_atomic
     def increment_file_version(self,
                                app_id:int,
                                filename:str,
@@ -105,10 +128,13 @@ class storage:
 
     # Move current version 0 to 1, 1 to 2, etc
     # Should be done before download file
+
+    @key_interrupt_atomic
     def rotate_file(self, app_id:int, filename:str, file_path:str, file_id:int, newest_file_time: datetime.datetime):
         num_of_version = self.db_.update_file_update_time_to_now(file_id, newest_file_time)
         self.increment_file_version(app_id, filename, file_path, num_of_version)
 
+    @key_interrupt_atomic
     def remove_outdated(self,
                         app_id:int,
                         filename:str,

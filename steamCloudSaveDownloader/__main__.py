@@ -95,7 +95,7 @@ def __main__():
                 logger.warning(notifier_.exception)
         e.log()
         exit_num = e.num()
-    except Exception:
+    except (Exception, KeyboardInterrupt) as e:
         ec = traceback.format_exc()
         if notifier_:
             if not notifier_.send(f"\n```{ec}```", False):
