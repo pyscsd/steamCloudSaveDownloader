@@ -76,3 +76,4 @@ docker exec -it scsd scsd_auth <username>
 |AUTO_UPDATE |Set to `true` to enable scsd auto update|false|
 
 ## Special Thanks
+- maer for beta test
