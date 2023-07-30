@@ -19,8 +19,15 @@ g_random_retry_interval = (15, 30)
 logger = logging.getLogger('scsd')
 
 def random_sleep_and_retry(func):
+    def random_retry_interval():
+        return random.randint(
+            g_random_retry_interval[0],
+            g_random_retry_interval[1])
+    def random_sleep_interval():
+        return random.randint(g_random_sleep_interval[0], g_random_sleep_interval[1])
+
     def wrapper(*args, **kwargs):
-        time.sleep(random.randint(g_random_sleep_interval[0], g_random_sleep_interval[1]))
+        time.sleep(random_sleep_interval())
         exception = None
         for i in range(g_retry_count):
             try:
@@ -29,10 +36,19 @@ def random_sleep_and_retry(func):
             except err.err as e:
                 exception = e
                 e.log()
-                sleep_interval = \
-                    random.randint(
-                        g_random_retry_interval[0],
-                        g_random_retry_interval[1])
+                sleep_interval = random_retry_interval()
+                logger.info(f'Retrying in {sleep_interval} seconds')
+                time.sleep(sleep_interval)
+            except requests.exceptions.ConnectionError as e:
+                exception = e
+                sleep_interval = random_retry_interval()
+                logger.error("Connection error")
+                logger.info(f'Retrying in {sleep_interval} seconds')
+                time.sleep(sleep_interval)
+            except BaseException as e:
+                exception = e
+                sleep_interval = random_retry_interval()
+                logger.error(e)
                 logger.info(f'Retrying in {sleep_interval} seconds')
                 time.sleep(sleep_interval)
         logger.error(f'Maximum attempt reached. Aborting')
@@ -52,7 +68,11 @@ class web:
         except:
             raise err.err(err_enum.INVALID_COOKIE_FORMAT)
 
-        response = self.session.get(g_web_acc_link)
+        @random_sleep_and_retry
+        def connect_to_account_page():
+            response = self.session.get(g_web_acc_link)
+
+        connect_to_account_page()
 
     # Return list of {"Game": name, "Link", link}
     @random_sleep_and_retry
