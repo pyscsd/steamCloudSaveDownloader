@@ -1,6 +1,7 @@
 from . import err
 from .err import err_enum
 from .parser import web_parser
+from . import config
 import requests
 import pickle
 import shutil
@@ -12,7 +13,7 @@ import logging
 g_language_specifier = "l=english"
 g_web_acc_link = f"https://store.steampowered.com/account/?{g_language_specifier}"
 g_web_link = f"https://store.steampowered.com/account/remotestorage/?{g_language_specifier}"
-g_random_sleep_interval = (3, 5)
+g_random_sleep_interval = None
 g_retry_count = 3
 g_random_retry_interval = (15, 30)
 
@@ -56,9 +57,13 @@ def random_sleep_and_retry(func):
     return wrapper
 
 class web:
-    def __init__(self, cookie):
+    def __init__(self, cookie, wait_interval):
+        global g_random_sleep_interval
+
         if not os.path.isfile(cookie):
             raise err.err(err_enum.NO_SESSION)
+
+        g_random_sleep_interval = (wait_interval[0], wait_interval[1])
         self.web_parser = web_parser()
         self.session = requests.Session()
         self.cookie_pkl = cookie

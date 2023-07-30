@@ -234,7 +234,7 @@ def main(parsed_args, notifier_):
         return
 
     session_pkl = auth_.get_session_path()
-    web_ = web.web(session_pkl)
+    web_ = web.web(session_pkl, parsed_args['Danger Zone']['wait_interval'])
 
     db_ = db.db(parsed_args['General']['save_dir'],
                 parsed_args['Rotation']['rotation'])

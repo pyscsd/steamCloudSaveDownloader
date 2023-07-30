@@ -24,7 +24,10 @@ Defaults = {
     },
     'Target': {
         "mode": (str, ""),
-        "list": (str, "")
+        "list": (list, "")
+    },
+    'Danger Zone': {
+        "wait_interval": (list, "3, 5")
     }
 }
 
@@ -69,6 +72,11 @@ class config:
         if entry not in obj:
             self.raise_err(f"'{entry}' required in config")
 
+    def delimit_list(self, p_input:str) -> list:
+        if p_input is None or len(p_input) == 0:
+            return None
+        return [int(x) for x in p_input.strip().split(',')]
+
     def type_convert(self, p_type, p_val):
         if (p_type == str):
             return str(p_val)
@@ -76,6 +84,8 @@ class config:
             return int(p_val)
         elif (p_type == bool):
             return bool(p_val)
+        elif (p_type == list):
+            return self.delimit_list(p_val)
         else:
             assert False, 'Unsupported type'
 
@@ -113,14 +123,11 @@ class config:
         if not notifier.is_supported(self.parsed['Notifier']['notifier']):
             self.raise_err(f"Unsupported notifier method '{self.parsed['Notifier']['notifier']}'")
 
-    def delimit_list(self, p_input:str) -> list:
-        if p_input is None or len(p_input) == 0:
-            return None
-        return [int(x) for x in p_input.strip().split(',')]
-
     def parse_target(self):
         self.parse_optional_section('Target')
-        self.parsed['Target']['list'] = self.delimit_list(self.parsed['Target']['list'])
+
+    def parse_danger_zone(self):
+        self.parse_optional_section('Danger Zone')
 
     def get_conf(self):
         self.parse_general()
@@ -128,6 +135,7 @@ class config:
         self.parse_rotation()
         self.parse_notifier()
         self.parse_target()
+        self.parse_danger_zone()
         return self.parsed
 
     def load_from_arg(self, parsed_args:dict):
@@ -139,6 +147,7 @@ class config:
         self.parsed['Rotation']['rotation'] = parsed_args['rotation']
         self.parse_notifier()
         self.parse_target()
+        self.parse_danger_zone()
         if 'auth' in parsed_args:
             self.parsed['auth'] = parsed_args['auth']
         return self.parsed
