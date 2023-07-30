@@ -6,7 +6,7 @@ from . import ver
 from .auth import auth
 from . import err
 from .notifier import notifier
-from .config import config
+from . import config
 from .summary import summary
 import logging
 import logging.handlers
@@ -45,9 +45,9 @@ def parse():
 
     if parsed_args['conf'] is not None:
         parsed_args = \
-            config(parsed_args['conf'], auth=parsed_args['auth']).get_conf()
+            config.config(parsed_args['conf'], auth=parsed_args['auth']).get_conf()
     else:
-        parsed_args = config().load_from_arg(parsed_args)
+        parsed_args = config.config().load_from_arg(parsed_args)
 
     return parsed_args
 
@@ -82,6 +82,9 @@ def __main__():
 
         logger.debug(parsed_args)
 
+        logger.info(f"Files will be saved to '{parsed_args['General']['save_dir']}'")
+
+
         notifier_ = notifier.create_instance(
             parsed_args['Notifier']['notifier'],
             **parsed_args['Notifier'])
@@ -101,7 +104,8 @@ def __main__():
             if not notifier_.send(f"\n```{ec}```", False):
                 logger.warning("Notifier not working as intended. Exception:")
                 logger.warning(notifier_.exception)
-        logger.error(ec)
+        if logger:
+            logger.error(ec)
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
     if exit_num != err.err_enum.LOCKED.value:
         delete_lock_file(parsed_args['General']['save_dir'])
