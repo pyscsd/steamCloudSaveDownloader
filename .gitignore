@@ -137,3 +137,4 @@ empty_cookie.txt
 invalid_cookies.txt
 scsd.conf
 docker_vol/
+.sentry/

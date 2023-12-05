@@ -1,9 +1,18 @@
-import steam.webauth as wa
+#import steam.webauth as wa
+from steampy.login import LoginExecutor
+from steampy import guard
+import requests
 from .err import err
 from .err import err_enum
 import pathlib
 import os
 import pickle
+import getpass
+
+def generate_one_time_code_override(p_input):
+    return p_input
+
+guard.generate_one_time_code = generate_one_time_code_override
 
 class auth:
     s_session_filename = 'session.sb'
@@ -11,12 +20,23 @@ class auth:
         self.data_dir = data_dir
 
     def new_session(self, username:str):
-        print("This program will NOT save your credential locally")
-        print("2FA codes is case SENSITIVE")
+        self.session = requests.Session()
         self.username = username
-        self.user = wa.WebAuth(username)
+
+        print("This program will NOT save your credential locally")
+        print(f'Username: {self.username}')
+
+        self.password = getpass.getpass()
+        print("2FA code on Steam Authenticator (Please get the 5 digits code manually)")
+        self.two_factor_code = input("2FA code (case insensitive): ")
+        self.two_factor_code = self.two_factor_code.upper()
         try:
-            self.session = self.user.cli_login()
+            login_executor = LoginExecutor(
+                self.username,
+                self.password,
+                self.two_factor_code,
+                self.session)
+            login_executor.login()
         except:
             raise err(err_enum.LOGIN_FAIL)
 
