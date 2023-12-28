@@ -27,6 +27,16 @@ class auth:
         print(f'Username: {self.username}')
 
         self.password = getpass.getpass()
+
+        try:
+            login_executor = LoginExecutor(
+                self.username,
+                self.password,
+                "",
+                self.session)
+            login_executor.login()
+        except:
+            pass
         print("2FA code on Steam Authenticator (Please get the 5 digits code manually)")
         self.two_factor_code = input("2FA code (case insensitive): ")
         self.two_factor_code = self.two_factor_code.upper()
