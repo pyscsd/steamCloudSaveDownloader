@@ -22,6 +22,14 @@ def get_tbody(soup):
     return main_content.table.tbody
 
 def parse_time(input:str) -> datetime.datetime:
+    dm_format = "%d %b @ %I:%M%p"
+    md_format = "%b %d @ %I:%M%p"
+    dmy_format = "%d %b, %Y @ %I:%M%p"
+    mdy_format = "%b %d, %Y @ %I:%M%p"
+
+    def is_dm_format(tokens):
+        return tokens[0].isdigit()
+
     if '@' not in input:
         raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
 
@@ -33,13 +41,21 @@ def parse_time(input:str) -> datetime.datetime:
         if len(tokens) == 4:
             now = datetime.datetime.now(tz=datetime.timezone.utc)
             year = now.year
-            d = datetime.datetime.strptime(input, "%d %b @ %I:%M%p")
+            if is_dm_format(tokens):
+                d = datetime.datetime.strptime(input, dm_format)
+            else:
+                d = datetime.datetime.strptime(input, md_format)
             datetime_ = d.replace(year=year, tzinfo=datetime.timezone.utc)
         elif len(tokens) == 5:
-            datetime_ = datetime.datetime.strptime(input, "%d %b, %Y @ %I:%M%p").replace(tzinfo=datetime.timezone.utc)
+            if is_dm_format(tokens):
+                datetime_ = datetime.datetime.strptime(input, dmy_format).replace(tzinfo=datetime.timezone.utc)
+            else:
+                datetime_ = datetime.datetime.strptime(input, mdy_format).replace(tzinfo=datetime.timezone.utc)
         else:
+            logger.error(f"Unable to parse time token {input}")
             raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
     except ValueError:
+        logger.error(f"Unable to parse time token {input}")
         raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
 
     return datetime_
