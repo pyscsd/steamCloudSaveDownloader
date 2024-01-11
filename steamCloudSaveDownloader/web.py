@@ -57,6 +57,7 @@ def random_sleep_and_retry(func):
     return wrapper
 
 class web:
+    # TODO: cookie is now loginExecutor
     def __init__(self, cookie, wait_interval):
         global g_random_sleep_interval
 
@@ -69,7 +70,7 @@ class web:
         self.cookie_pkl = cookie
         try:
             with open(self.cookie_pkl, 'rb') as f:
-                self.session.cookies.update(pickle.load(f))
+                self.session.cookies.update(pickle.load(f).session.cookies)
         except:
             raise err.err(err_enum.INVALID_COOKIE_FORMAT)
 

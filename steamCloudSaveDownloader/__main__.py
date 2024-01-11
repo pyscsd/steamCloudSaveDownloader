@@ -233,6 +233,7 @@ def main(parsed_args, notifier_):
         auth_.new_session(parsed_args['auth'])
         return
 
+    auth_.refresh_session()
     session_pkl = auth_.get_session_path()
     web_ = web.web(session_pkl, parsed_args['Danger Zone']['wait_interval'])
 
