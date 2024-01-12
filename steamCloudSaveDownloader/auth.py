@@ -55,7 +55,8 @@ class auth:
             login_executor = LoginExecutor(
                 self.username,
                 self.password,
-                "")
+                "",
+                self.session)
             login_executor.login()
         except:
             pass
