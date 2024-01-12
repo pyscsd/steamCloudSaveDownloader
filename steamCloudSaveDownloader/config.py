@@ -7,7 +7,8 @@ from .notifier import notifier, notify_method
 
 Defaults = {
     'General': {
-        "save_dir": (str, "./data")
+        "save_dir": (str, "./data"),
+        "2fa": (str, "mobile", ("mobile", "mail"))
     },
     'Rotation': {
         "rotation": (int, 15)
@@ -77,23 +78,34 @@ class config:
             return None
         return [int(x) for x in p_input.strip().split(',')]
 
-    def type_convert(self, p_type, p_val):
-        if (p_type == str):
-            return str(p_val)
-        elif (p_type == int):
-            return int(p_val)
-        elif (p_type == bool):
-            return bool(p_val)
-        elif (p_type == list):
-            return self.delimit_list(p_val)
-        else:
-            assert False, 'Unsupported type'
+    def enumeration_check(self, p_section, p_entry, p_val):
+        if len(Defaults[p_section][p_entry]) != 3:
+            return
+        enum = Defaults[p_section][p_entry][2]
+
+        if p_val not in enum:
+            self.raise_err(f"Field '{p_entry}' should have these values '{enum}'. Got value '{p_val}' instead")
+
+    def type_convert(self, p_entry, p_type, p_val):
+        try:
+            if (p_type == str):
+                return str(p_val)
+            elif (p_type == int):
+                return int(p_val)
+            elif (p_type == bool):
+                return bool(p_val)
+            elif (p_type == list):
+                return self.delimit_list(p_val)
+            else:
+                assert False, 'Unsupported type'
+        except ValueError as e:
+            self.raise_err(f"Field '{p_entry}' of value '{p_val}' should have type '{p_type.__name__}'")
 
 
     def load_default(self, p_section:str, p_entry:str):
         tup = Defaults[p_section][p_entry]
         self.parsed[p_section][p_entry] = \
-            self.type_convert(tup[0], tup[1])
+            self.type_convert(p_entry, tup[0], tup[1])
 
     def parse_optional_section(self, p_section:str):
         if self.parser is not None and p_section in self.parser:
@@ -104,8 +116,13 @@ class config:
         for entry in Defaults[p_section]:
             type_ = Defaults[p_section][entry][0]
             if entry in section:
-                self.parsed[p_section][entry] = \
-                    self.type_convert(type_, section[entry])
+                val = \
+                    self.type_convert(entry, type_, section[entry])
+                self.enumeration_check(
+                    p_section,
+                    entry,
+                    val)
+                self.parsed[p_section][entry] = val
             else:
                 self.load_default(p_section, entry)
 

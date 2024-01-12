@@ -98,7 +98,10 @@ def __main__():
                 logger.warning(notifier_.exception)
         e.log()
         exit_num = e.num()
-    except (Exception, KeyboardInterrupt) as e:
+    except KeyboardInterrupt:
+        exit_num = err.err_enum.KB_INTERRUPT.value
+        print("Keyboard interrupt received", file=sys.stderr)
+    except Exception as e:
         ec = traceback.format_exc()
         if notifier_:
             if not notifier_.send(f"\n```{ec}```", False):
@@ -106,9 +109,14 @@ def __main__():
                 logger.warning(notifier_.exception)
         if logger:
             logger.error(ec)
+        else:
+            print(ec)
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
     if exit_num != err.err_enum.LOCKED.value:
-        delete_lock_file(parsed_args['General']['save_dir'])
+        try:
+            delete_lock_file(parsed_args['General']['save_dir'])
+        except:
+            pass
     sys.exit(exit_num)
 
 def add_new_game(db_, storage_, web_, game, file_infos, summary_):

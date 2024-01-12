@@ -20,6 +20,7 @@ class err_enum(IntEnum):
     REQUESTS_LIMIT_EXCEED = 13,
     LOCKED = 14,
     INVALID_SCRIPT_PATH = 15,
+    KB_INTERRUPT = 255
     UNKNOWN_EXCEPTION = 256
 
 ERR_INFO = {
