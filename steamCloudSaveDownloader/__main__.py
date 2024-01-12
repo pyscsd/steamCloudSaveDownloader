@@ -233,7 +233,9 @@ def main(parsed_args, notifier_):
     global logger
 
     summary_ = summary(int(parsed_args['Notifier']['level']))
-    auth_ = auth(parsed_args['General']['save_dir'])
+    auth_ = auth(
+        parsed_args['General']['save_dir'],
+        parsed_args['General']['2fa'])
 
     if 'auth' in parsed_args and \
             parsed_args['auth'] is not None and \
