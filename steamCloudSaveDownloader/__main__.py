@@ -251,6 +251,7 @@ def main(parsed_args, notifier_):
                 parsed_args['Rotation']['rotation'])
     storage_ = storage.storage(parsed_args['General']['save_dir'], db_)
 
+    logger.info("Getting Game Save List")
     game_list = web_.get_list()
 
     target_count = get_overall_target_counts(parsed_args['Target'], game_list)

@@ -2,6 +2,7 @@ from . import err
 from .err import err_enum
 from .parser import web_parser
 from . import config
+from enum import IntEnum
 import requests
 import pickle
 import shutil
@@ -11,77 +12,94 @@ import os
 import logging
 
 g_language_specifier = "l=english"
-g_web_acc_link = f"https://store.steampowered.com/account/?{g_language_specifier}"
 g_web_link = f"https://store.steampowered.com/account/remotestorage/?{g_language_specifier}"
-g_random_sleep_interval = None
+g_random_sleep_interval = (3, 5)
 g_retry_count = 3
-g_random_retry_interval = (15, 30)
 
 logger = logging.getLogger('scsd')
 
-def random_sleep_and_retry(func):
-    def random_retry_interval():
+class sleep_and_retry:
+    class sleep_policy_e(IntEnum):
+        RANDOM = 1
+        EXP = 2
+
+    def __init__(self, sleep_policy):
+        assert type(sleep_policy) == self.sleep_policy_e
+        self.exp = 0
+        self.sleep_policy = sleep_policy
+
+    def random_sleep_interval(self):
+        global g_random_sleep_interval
         return random.randint(
-            g_random_retry_interval[0],
-            g_random_retry_interval[1])
-    def random_sleep_interval():
-        return random.randint(g_random_sleep_interval[0], g_random_sleep_interval[1])
+            g_random_sleep_interval[0],
+            g_random_sleep_interval[1])
 
-    def wrapper(*args, **kwargs):
-        time.sleep(random_sleep_interval())
-        exception = None
-        for i in range(g_retry_count):
-            try:
-                retval = func(*args, **kwargs)
-                return retval
-            except err.err as e:
-                exception = e
-                e.log()
-                sleep_interval = random_retry_interval()
-                logger.info(f'Retrying in {sleep_interval} seconds')
-                time.sleep(sleep_interval)
-            except requests.exceptions.ConnectionError as e:
-                exception = e
-                sleep_interval = random_retry_interval()
-                logger.error("Connection error")
-                logger.info(f'Retrying in {sleep_interval} seconds')
-                time.sleep(sleep_interval)
-            except BaseException as e:
-                exception = e
-                sleep_interval = random_retry_interval()
-                logger.error(e)
-                logger.info(f'Retrying in {sleep_interval} seconds')
-                time.sleep(sleep_interval)
-        logger.error(f'Maximum attempt reached. Aborting')
-        raise exception
-    return wrapper
+    def exponential_sleep_interval(self):
+        val = (2 ** self.exp)
+        return val
 
+    def exponential_fail(self):
+        self.exp += 1
+
+    def __call__(self, func):
+        def wrapper(*args, **kwargs):
+            if self.sleep_policy == self.sleep_policy_e.RANDOM:
+                sleep_func = self.random_sleep_interval
+            elif self.sleep_policy == self.sleep_policy_e.EXP:
+                sleep_func = self.exponential_sleep_interval
+            else:
+                assert False, 'Unsupported Policy'
+            exception = None
+            sleep_interval = sleep_func()
+            for i in range(g_retry_count):
+                if sleep_interval > 1 and self.sleep_policy == self.sleep_policy_e.RANDOM:
+                    logger.info(f"Random sleep for {sleep_interval} seconds")
+                time.sleep(sleep_interval)
+                try:
+                    retval = func(*args, **kwargs)
+                    return retval
+                except err.err as e:
+                    exception = e
+                    e.log()
+                    self.exponential_fail()
+                    sleep_interval = sleep_func()
+                    logger.info(f'Retrying in {sleep_interval} seconds')
+                except requests.exceptions.ConnectionError as e:
+                    exception = e
+                    self.exponential_fail()
+                    sleep_interval = sleep_func()
+                    logger.error("Connection error")
+                    logger.info(f'Retrying in {sleep_interval} seconds')
+                except BaseException as e:
+                    exception = e
+                    self.exponential_fail()
+                    sleep_interval = sleep_func()
+                    logger.error(e)
+                    logger.info(f'Retrying in {sleep_interval} seconds')
+            logger.error(f'Maximum attempt reached. Aborting')
+            raise exception
+
+        return wrapper
 class web:
     # TODO: cookie is now loginExecutor
-    def __init__(self, cookie, wait_interval):
+    def __init__(self, login_executor_pkl, wait_interval):
         global g_random_sleep_interval
 
-        if not os.path.isfile(cookie):
+        if not os.path.isfile(login_executor_pkl):
             raise err.err(err_enum.NO_SESSION)
 
         g_random_sleep_interval = (wait_interval[0], wait_interval[1])
         self.web_parser = web_parser()
         self.session = requests.Session()
-        self.cookie_pkl = cookie
+        self.login_executor_pkl = login_executor_pkl
         try:
-            with open(self.cookie_pkl, 'rb') as f:
+            with open(self.login_executor_pkl, 'rb') as f:
                 self.session.cookies.update(pickle.load(f).session.cookies)
         except:
             raise err.err(err_enum.INVALID_COOKIE_FORMAT)
 
-        @random_sleep_and_retry
-        def connect_to_account_page():
-            response = self.session.get(g_web_acc_link)
-
-        connect_to_account_page()
-
     # Return list of {"Game": name, "Link", link}
-    @random_sleep_and_retry
+    @sleep_and_retry(sleep_and_retry.sleep_policy_e.RANDOM)
     def get_list(self):
         response = self.session.get(g_web_link)
         if (response.status_code != 200):
@@ -89,7 +107,7 @@ class web:
 
         return self.web_parser.parse_index(response.text)
 
-    @random_sleep_and_retry
+    @sleep_and_retry(sleep_and_retry.sleep_policy_e.RANDOM)
     def _get_game_save(self, game_link:str):
         response = self.session.get(game_link)
         if (response.status_code != 200):
@@ -113,7 +131,7 @@ class web:
                 break
         return save_file_list
 
-    @random_sleep_and_retry
+    @sleep_and_retry(sleep_and_retry.sleep_policy_e.EXP)
     def download_game_save(self, link:str, store_location:str):
         with self.session.get(link, stream=True) as r:
             with open(store_location, 'wb') as f:
