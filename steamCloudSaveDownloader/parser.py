@@ -22,8 +22,8 @@ def get_tbody(soup):
     return main_content.table.tbody
 
 def parse_time(input:str) -> datetime.datetime:
-    dm_format = "%d %b @ %I:%M%p"
-    md_format = "%b %d @ %I:%M%p"
+    dm_format = "%d %b @ %I:%M%p %Y"
+    md_format = "%b %d @ %I:%M%p %Y"
     dmy_format = "%d %b, %Y @ %I:%M%p"
     mdy_format = "%b %d, %Y @ %I:%M%p"
 
@@ -41,10 +41,13 @@ def parse_time(input:str) -> datetime.datetime:
         if len(tokens) == 4:
             now = datetime.datetime.now(tz=datetime.timezone.utc)
             year = now.year
+
+            # strptime treat date as 1900, with no Feb 29, set to
+            # leap year to circulate this problem
             if is_dm_format(tokens):
-                d = datetime.datetime.strptime(input, dm_format)
+                d = datetime.datetime.strptime(input + " 2024", dm_format)
             else:
-                d = datetime.datetime.strptime(input, md_format)
+                d = datetime.datetime.strptime(input + " 2024", md_format)
             datetime_ = d.replace(year=year, tzinfo=datetime.timezone.utc)
         elif len(tokens) == 5:
             if is_dm_format(tokens):
