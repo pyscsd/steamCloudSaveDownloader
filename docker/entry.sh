@@ -34,11 +34,6 @@ set_cron () {
         return
     fi
 
-    if [ -f /config/scsd.conf ]; then
-        CONFIG="/config/scsd.conf"
-    else
-        CONFIG="/config/scsd.conf.default"
-    fi
     echo "Crontab schedule:  ${CRON_VAR}"
     echo "${CRON_VAR} /bin/sh /opt/run.sh" > /tmp/cron
 

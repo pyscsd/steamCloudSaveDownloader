@@ -66,6 +66,8 @@ docker exec -it scsd scsd_auth <username>
 ### Volumes
 - `/data`: Where the save files and program related files are located
 - `/config`: Where the configuration file is stored.
+    - scsd will look for `scsd.conf` within this directory and take it as config file.
+    - If not, scsd will create a config file named `scsd.conf.default`. Which takes precedence after `scsd.conf`, if co-exist.
 
 ### Environment Variables
 |Name        |Purpose|Default|
