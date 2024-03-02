@@ -74,7 +74,7 @@ gen_default_config () {
         return
     fi
 
-    echo -e '[Required]\nsave_dir = /data\n' > /config/scsd.conf.default
+    echo -e '[General]\nsave_dir = /data\n' > /config/scsd.conf.default
     chown user:user /config/scsd.conf.default
     echo "Default config created"
 }
