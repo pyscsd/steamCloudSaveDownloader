@@ -1,9 +1,12 @@
 import configparser
 import os
 import pathlib
+import logging
 from .err import err
 from .err import err_enum
 from .notifier import notifier, notify_method
+
+logger = logging.getLogger('scsd')
 
 Defaults = {
     'General': {
@@ -45,6 +48,7 @@ class config:
         if self.config_file is not None:
             try:
                 self.parser.read(self.config_file)
+                logger.info(f"Config read from '{self.config_file}'")
             except configparser.MissingSectionHeaderError as e:
                 self.raise_err("[PLACEHOLDER_TEXT] section required for entire file")
         else:
@@ -113,6 +117,11 @@ class config:
         else:
             section = dict()
 
+        # Check excessive section
+        for entry in section:
+            if entry not in Defaults[p_section]:
+                logger.warning(f"Unknown option '{entry}' in section '[{p_section}]'")
+
         for entry in Defaults[p_section]:
             type_ = Defaults[p_section][entry][0]
             if entry in section:
@@ -146,7 +155,15 @@ class config:
     def parse_danger_zone(self):
         self.parse_optional_section('Danger Zone')
 
+    def check_additional_section(self):
+        if self.parser is None:
+            return
+        for section in self.parser:
+            if section != "DEFAULT" and section not in Defaults:
+                logger.warning(f'Unknown section "[{section}]" exist in config file')
+
     def get_conf(self):
+        self.check_additional_section()
         self.parse_general()
         self.parse_log()
         self.parse_rotation()

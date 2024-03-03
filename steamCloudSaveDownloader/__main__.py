@@ -17,28 +17,31 @@ import os
 logger = None
 
 g_lock_file_name = ".scsd.lock"
+g_logger_format = '%(asctime)s [%(levelname)s] %(message)s'
+g_logger_datefmt = '%Y-%m-%d %H:%M:%S'
+g_logger_formatter = logging.Formatter(
+    fmt=g_logger_format, datefmt=g_logger_datefmt)
 
-def setup_logger(parsed_args):
+def setup_logger():
     global logger
 
     logger = logging.getLogger('scsd')
-
-    format='%(asctime)s [%(levelname)s] %(message)s'
-    datefmt='%Y-%m-%d %H:%M:%S'
-    formatter = logging.Formatter(fmt=format, datefmt=datefmt)
-
     sh = logging.StreamHandler()
+    sh.setFormatter(g_logger_formatter)
+    logger.addHandler(sh)
+    logger.info(f'scsd-{ver.__version__} started')
+    logger.setLevel(logging.INFO)
+
+def setup_logger_post_config(parsed_args):
+    global logger
+
     fh = logging.handlers.RotatingFileHandler(
         os.path.join(parsed_args['General']['save_dir'], 'scsd.log'),
         maxBytes=10485760, # 10MB
         backupCount=5)
-    sh.setFormatter(formatter)
-    fh.setFormatter(formatter)
+    fh.setFormatter(g_logger_formatter)
     logger.addHandler(fh)
-    logger.addHandler(sh)
     logger.setLevel(args.args.convert_log_level(parsed_args['Log']['log_level']))
-
-    logger.info(f'scsd-{ver.__version__} started')
 
 def parse():
     parsed_args = args.args().parse(sys.argv[1:])
@@ -73,12 +76,13 @@ def __main__():
 
     exit_num = 0
     try:
+        setup_logger()
         parsed_args = parse()
 
         if not os.path.exists(parsed_args['General']['save_dir']):
             os.makedirs(parsed_args['General']['save_dir'])
 
-        setup_logger(parsed_args)
+        setup_logger_post_config(parsed_args)
 
         logger.debug(parsed_args)
 
