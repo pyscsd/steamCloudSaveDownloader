@@ -46,11 +46,27 @@ def setup_logger_post_config(parsed_args):
 def parse():
     parsed_args = args.args().parse(sys.argv[1:])
 
+    def is_stored_specified(parsed_args):
+        if parsed_args == [-1]:
+            return None
+        elif parsed_args == None:
+            return []
+        else:
+            return parsed_args
+
+
     if parsed_args['conf'] is not None:
         parsed_args = \
-            config.config(parsed_args['conf'], auth=parsed_args['auth']).get_conf()
+            config.config(
+                parsed_args['conf'],
+                auth=parsed_args['auth'],
+                stored=is_stored_specified(parsed_args['stored'])
+            ).get_conf()
     else:
-        parsed_args = config.config().load_from_arg(parsed_args)
+        parsed_args = \
+            config.config(
+                stored=is_stored_specified(parsed_args['stored'])
+            ).load_from_arg(parsed_args)
 
     return parsed_args
 
@@ -245,6 +261,10 @@ def main(parsed_args, notifier_):
             parsed_args['auth'] is not None and \
             len(parsed_args['auth']) != 0:
         auth_.new_session(parsed_args['auth'])
+        return
+    elif 'stored' in parsed_args and \
+        parsed_args['stored'] is not None:
+        print(parsed_args['stored'])
         return
 
     auth_.refresh_session()

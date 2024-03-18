@@ -63,6 +63,16 @@ class args:
             help="How detail should the log be"
         )
 
+        self.parser.add_argument(
+            "-s",
+            nargs="?",
+            metavar="[app_id1,app_id2,...]",
+            dest="stored",
+            type=self.is_int_list, # TODO array type
+            default=[-1],
+            help="Show the files saved locally"
+        )
+
     def convert_log_level(level:int):
         if (level == 0):
             return logging.ERROR
@@ -96,3 +106,10 @@ class args:
             return pathlib.Path(arg)
         else:
             self.parser.error(f"The directory '{arg}' does not exist.")
+
+    def is_int_list(self, arg):
+        tokens = arg.split(',')
+        try:
+            return [int(token) for token in tokens]
+        except:
+            self.parser.error(f"The appid list '{arg}' is invalid. Should be 'app_id1,app_id2,...'")

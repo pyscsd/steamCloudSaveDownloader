@@ -39,7 +39,7 @@ class config:
     def raise_err(self, additional_info=""):
         self.parse_error.set_additional_info(additional_info)
         raise self.parse_error
-    def __init__(self, file=None, auth=None):
+    def __init__(self, file=None, auth=None, stored=None):
         self.parse_error = err(err_enum.INVALID_CONFIG)
 
         self.config_file = file
@@ -60,6 +60,9 @@ class config:
 
         if auth:
             self.parsed['auth'] = auth
+
+        if stored is not None:
+            self.parsed['stored'] = stored
 
     def is_file(self, arg) -> pathlib.Path:
         if os.path.isfile(arg):
