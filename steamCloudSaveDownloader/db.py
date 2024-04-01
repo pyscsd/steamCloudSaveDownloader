@@ -38,7 +38,7 @@ logger = logging.getLogger('scsd')
 
 class db:
     requests_limit = 85000
-    def __init__(self, db_location:str, rotation:int):
+    def __init__(self, db_location:str, rotation:int=0):
         self.location = db_location
         self.rotation = rotation
         self.db_file = os.path.join(db_location, DB_FILENAME)
@@ -236,3 +236,38 @@ class db:
         logger.debug(f"DB Removing version {outdated_version_num}")
 
         return outdated_version_num
+
+    def get_stored_game_names(self, ids:list):
+        # Performance should be negligible other wise think of better
+        # way to query
+        cur = self.con.cursor()
+        query = "SELECT app_id, game_name FROM GAMES";
+        res = cur.execute(query)
+        result = res.fetchall();
+        if len(ids) == 0:
+            return_payload = {tup for tup in result}
+        else:
+            return_payload = {tup for tup in result if tup[0] in ids}
+        if len(ids) == 0 or len(return_payload) == len(ids):
+            return return_payload
+
+        result_set = {tup[0] for tup in result if tup[0] in ids}
+        query_set = set(ids)
+
+        diff_set = query_set - result_set
+        logger.warning(f'AppID set {diff_set} not found in database')
+        return return_payload
+
+    def get_files_info_by_appid(self, appid:int):
+        cur = self.con.cursor()
+        query = "SELECT file_id, filename, path FROM FILES WHERE app_id = ?";
+        res = cur.execute(query, (appid,))
+        result = res.fetchall();
+        return result
+
+    def get_file_version_by_file_id(self, file_id:int):
+        cur = self.con.cursor()
+        query = "SELECT time, version_num FROM VERSION WHERE file_id = ? ORDER BY version_num ASC;";
+        res = cur.execute(query, (file_id,))
+        result = res.fetchall();
+        return result

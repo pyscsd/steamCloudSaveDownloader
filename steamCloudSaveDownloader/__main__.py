@@ -5,6 +5,7 @@ from . import db
 from . import err
 from .notifier import notifier
 from . import storage
+from . import stored
 from .summary import summary
 from . import ver
 from . import web
@@ -265,7 +266,8 @@ def main(parsed_args, notifier_):
         return
     elif 'stored' in parsed_args and \
         parsed_args['stored'] is not None:
-        print(parsed_args['stored'])
+        stored_ = stored.stored(parsed_args['stored'], parsed_args['General']['save_dir'])
+        stored_.get_result()
         return
 
     auth_.refresh_session()
