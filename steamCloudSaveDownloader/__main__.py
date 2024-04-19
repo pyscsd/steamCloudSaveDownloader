@@ -65,6 +65,7 @@ def parse():
                 stored=is_stored_specified(parsed_args['stored'])
             ).get_conf()
     else:
+        logger.info(f'Config file not provided')
         parsed_args = \
             config.config(
                 stored=is_stored_specified(parsed_args['stored'])
@@ -102,8 +103,9 @@ def __main__():
 
         setup_logger_post_config(parsed_args)
 
-        logger.debug(parsed_args)
+        logger.info(f'Options: {parsed_args}')
 
+        logger.info(f"CWD: {os.getcwd()}")
         logger.info(f"Files will be saved to '{parsed_args['General']['save_dir']}'")
 
 

@@ -10,31 +10,31 @@ new_user () {
     USER_EXIST="$?"
 
     if [ "$USER_EXIST" -eq 0 ]; then
-        echo "User exist, skip creation"
+        echo "[entry.sh] User exist, skip creation"
         return
     fi
 
     addgroup -g "${PGID}" user
     adduser -h /user -g "" -s /bin/sh -G user -D -u "${PUID}" user
-    echo "Add user(${PUID}) and group(${PGID})"
+    echo "[entry.sh] Add user(${PUID}) and group(${PGID})"
 }
 
 set_permission () {
-    echo "Setting permission"
+    echo "[entry.sh] Setting permission"
     chown user:user /data
     chown user:user /config
     chown user:user /opt/run.sh
 }
 
 set_cron () {
-    echo "Setting cron"
+    echo "[entry.sh] Setting cron"
 
     if [ -f "/etc/crontabs/user" ]; then
-        echo "Crontab exist. Skipped"
+        echo "[entry.sh] Crontab exist. Skipped"
         return
     fi
 
-    echo "Crontab schedule:  ${CRON_VAR}"
+    echo "[entry.sh] Crontab schedule:  ${CRON_VAR}"
     echo "${CRON_VAR} /bin/sh /opt/run.sh" > /tmp/cron
 
     crontab -u user /tmp/cron
@@ -42,11 +42,11 @@ set_cron () {
 }
 
 setup_auto_update() {
-    echo "[Auto update] starting"
+    echo "[entry.sh] Setting up auto update"
 
     if [ "${AUTO_UPDATE}" = "false" ]; then
         crontab -r
-        echo "[Auto udpate] False->disabled"
+        echo "[entry.sh] Auto update set to disabled"
         return
     fi
 
@@ -54,29 +54,29 @@ setup_auto_update() {
     retval=$?
 
     if [ $retval -eq 0 ]; then
-        echo "[Auto udpate] Exist->Skipped"
+        echo "[entry.sh] Auto update job exist->Skipped"
         return
     fi
 
     echo "27 */4 * * * pip install -U scsd" >> /etc/crontabs/root
-    echo "[Auto udpate] Added"
+    echo "[entry.sh] Auto update added to crontab"
 
 }
 
 gen_default_config () {
     if [ -f /config/scsd.conf ]; then
-        echo "Config exist skipped"
+        echo "[entry.sh] Config exist. Skip default config creation"
         return
     fi
 
     if [ -f /config/scsd.conf.default ]; then
-        echo "Default config exist skipped"
+        echo "[entry.sh] Default config exist. Skip default config creation"
         return
     fi
 
     echo -e '[General]\nsave_dir = /data\n' > /config/scsd.conf.default
     chown user:user /config/scsd.conf.default
-    echo "Default config created"
+    echo "[entry.sh] Default config created"
 }
 
 new_user

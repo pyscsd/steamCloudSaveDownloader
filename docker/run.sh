@@ -5,7 +5,9 @@ if [ -f /config/scsd.conf ]; then
 elif [ -f /config/scsd.conf.default ]; then
     CONFIG="/config/scsd.conf.default"
 else
-    echo "No config. scsd not ran"
+    echo "[run.sh] No config. scsd not ran"
+    exit 1
 fi
 
+echo "[run.sh] Config specified ${CONFIG}"
 scsd -f "${CONFIG}" $@
