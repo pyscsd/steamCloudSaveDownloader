@@ -82,7 +82,7 @@ class config:
 
     def delimit_list(self, p_input:str) -> list:
         if p_input is None or len(p_input) == 0:
-            return None
+            return []
         return [int(x) for x in p_input.strip().split(',')]
 
     def enumeration_check(self, p_section, p_entry, p_val):
