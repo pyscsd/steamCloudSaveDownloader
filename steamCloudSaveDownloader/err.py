@@ -20,6 +20,7 @@ class err_enum(IntEnum):
     REQUESTS_LIMIT_EXCEED = 13,
     LOCKED = 14,
     INVALID_SCRIPT_PATH = 15,
+    CANNOT_WRITE_TO_SAVE_DIR = 16,
     KB_INTERRUPT = 255
     UNKNOWN_EXCEPTION = 256
 
@@ -83,6 +84,10 @@ ERR_INFO = {
     err_enum.INVALID_SCRIPT_PATH: [
         logging.ERROR,
         "Invalid script path. The script file does not exist or insufficient permission."
+    ],
+    err_enum.CANNOT_WRITE_TO_SAVE_DIR: [
+        logging.ERROR,
+        "Unable to write to the specified save_dir"
     ],
     err_enum.UNKNOWN_EXCEPTION: [
         logging.ERROR,

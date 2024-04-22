@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ "$(id -u)" -eq 0 ]; then
+  exec su user -c "/opt/run.sh $@"
+fi
+
 if [ -f /config/scsd.conf ]; then
     CONFIG="/config/scsd.conf"
 elif [ -f /config/scsd.conf.default ]; then

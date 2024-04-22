@@ -79,10 +79,20 @@ gen_default_config () {
     echo "[entry.sh] Default config created"
 }
 
+create_scsd_dockerenv () {
+    if [ -f "/.scsd_dockerenv" ]; then
+        echo "[entry.sh] .scsd_dockerenv exist. Skipped"
+        return
+    fi
+    echo "[entry.sh] Creating .scsd_dockerenv"
+    touch "/.scsd_dockerenv"
+}
+
 new_user
 set_permission
 set_cron
 setup_auto_update
 gen_default_config
+create_scsd_dockerenv
 
 exec crond -f -d 8

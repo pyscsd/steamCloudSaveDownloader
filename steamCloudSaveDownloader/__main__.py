@@ -7,6 +7,7 @@ from .notifier import notifier
 from . import storage
 from . import stored
 from .summary import summary
+from . import utility
 from . import ver
 from . import web
 
@@ -46,9 +47,8 @@ def setup_logger_post_config(parsed_args):
     logger.setLevel(args.args.convert_log_level(parsed_args['Log']['log_level']))
 
 def in_container_check(parsed_args):
-    if os.path.isfile("/.dockerenv") or os.getenv("SCSD_DOCKER") is not None:
-        if parsed_args['General']['save_dir'] != '/data':
-            logger.warning("Detect container environment. However 'save_dir' is not set to '/data'")
+    if os.path.isfile("/.scsd_dockerenv") and os.getenv("SCSD_DOCKER") is None:
+        logger.warning("Detect container environment. Please run scsd with `/opt/run.sh` and authentication with `scsd_auth`")
 
 def parse():
     parsed_args = args.args().parse(sys.argv[1:])
@@ -103,6 +103,8 @@ def __main__():
     try:
         setup_logger()
         parsed_args = parse()
+
+        utility.permission_checking(parsed_args['General']['save_dir'])
 
         if not os.path.exists(parsed_args['General']['save_dir']):
             os.makedirs(parsed_args['General']['save_dir'])
