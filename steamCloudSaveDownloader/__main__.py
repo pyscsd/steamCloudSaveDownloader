@@ -104,10 +104,7 @@ def __main__():
         setup_logger()
         parsed_args = parse()
 
-        utility.permission_checking(parsed_args['General']['save_dir'])
-
-        if not os.path.exists(parsed_args['General']['save_dir']):
-            os.makedirs(parsed_args['General']['save_dir'])
+        utility.save_dir_permission_checking(parsed_args['General']['save_dir'])
 
         setup_logger_post_config(parsed_args)
 
