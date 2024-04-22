@@ -10,4 +10,5 @@ else
 fi
 
 echo "[run.sh] Config specified ${CONFIG}"
+export SCSD_DOCKER=1
 scsd -f "${CONFIG}" $@

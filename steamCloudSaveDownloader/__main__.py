@@ -45,6 +45,11 @@ def setup_logger_post_config(parsed_args):
     logger.addHandler(fh)
     logger.setLevel(args.args.convert_log_level(parsed_args['Log']['log_level']))
 
+def in_container_check(parsed_args):
+    if os.path.isfile("/.dockerenv") or os.getenv("SCSD_DOCKER") is not None:
+        if parsed_args['General']['save_dir'] != '/data':
+            logger.warning("Detect container environment. However 'save_dir' is not set to '/data'")
+
 def parse():
     parsed_args = args.args().parse(sys.argv[1:])
 
@@ -71,6 +76,7 @@ def parse():
                 stored=is_stored_specified(parsed_args['stored'])
             ).load_from_arg(parsed_args)
 
+    in_container_check(parsed_args)
     return parsed_args
 
 def should_process_appid(p_target:dict(), p_input:int) -> bool:
