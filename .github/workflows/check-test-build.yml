@@ -67,6 +67,9 @@ jobs:
           ruff --select=E9,F63,F7,F82 --target-version=py39 .
           # default set of ruff rules with GitHub Annotations
           ruff --target-version=py39 .
+      - name: Run Tests
+        run: |
+          python -m pytest
       - name: Download version.txt
         uses: actions/download-artifact@v3
         with:
