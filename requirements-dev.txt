@@ -1,5 +1,4 @@
 steampy>=1.1.2,<2
-#steam[client]>=1.4.4,<2
 requests>=2.28.2,<3
 beautifulsoup4>=4.12.2,<5
 discord-webhook>=1.1.0,<2
@@ -9,3 +8,4 @@ pre-commit>=3.3.2,<4
 build>=0.10.0,<1
 twine>=4.0.2,<5
 tzdata>=2023.3
+pytest>=8.1.1,<9

@@ -87,12 +87,6 @@ class args:
         parsed_args = self.parser.parse_args(raw_args)
         return vars(parsed_args)
 
-    def supported_notifier(self, arg):
-        if notifier.is_supported(arg):
-            return arg
-        else:
-            self.parser.error(f"Unsupported notifier '{arg}'")
-
     def is_file(self, arg):
         if len(arg) == 0:
             return None
