@@ -6,6 +6,7 @@ import logging
 from discord_webhook import DiscordWebhook
 import subprocess
 import os
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +76,8 @@ class notifier:
         webhook = webhook.execute()
 
     def script_send(self, msg:str):
+        if sys.platform == 'win32':
+            return
         try:
             subprocess.run([self.path, msg])
         except FileNotFoundError:

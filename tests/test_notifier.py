@@ -20,5 +20,3 @@ class TestNotifier:
         with open(output_txt, "r") as f:
             content = f.read()
             assert content == "[scsd-Version Unknown] :white_check_mark: achaka\n"
-
-    # TODO test cmd
