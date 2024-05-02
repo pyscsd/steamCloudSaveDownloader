@@ -13,3 +13,10 @@ repos:
   rev: v0.0.270
   hooks:
     - id: ruff
+- repo: local
+  hooks:
+    - id: pytest-check
+      name: pytest-check
+      entry: pytest
+      language: python
+      types: [python]
