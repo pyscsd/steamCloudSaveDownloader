@@ -24,8 +24,11 @@ If applicable, add screenshots to help explain your problem.
  - Content of config file:
     - Please remove confidential context (e.g. discord webhook, usernames, etc.)
 
-**Log file:**
-scsd creates log file under the folder specified `save_dir` (default to `./data`). Feel free to remove game names you don't want to be exposed
+**Log file and config :**
+scsd creates log file under the folder specified in `save_dir` (default to `./data`). Remember to remove info you don't want to be exposed. For example:
+- Steam username / Steam ID
+- Games you wish nobody would know you have played
+- Discord webhook link, email credentials
 
 **Additional context**
 Add any other context about the problem here.
