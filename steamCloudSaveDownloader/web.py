@@ -109,7 +109,7 @@ class web:
 
     @sleep_and_retry(sleep_and_retry.sleep_policy_e.RANDOM)
     def _get_game_save(self, game_link:str):
-        response = self.session.get(game_link)
+        response = self.session.get(game_link + f"?{g_language_specifier}")
         if (response.status_code != 200):
             err.err(err_enum.CANNOT_RETRIEVE_GAME_FILES).log()
             return (None, None)
