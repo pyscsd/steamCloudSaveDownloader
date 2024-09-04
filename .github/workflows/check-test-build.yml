@@ -20,7 +20,7 @@ jobs:
         run: |
           echo "${GITHUB_SHA:0:7}" >> version.txt
       - name: Upload version.txt
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: version.txt
           path: |
@@ -71,7 +71,7 @@ jobs:
         run: |
           python -m pytest
       - name: Download version.txt
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: version.txt
           path: .
@@ -96,7 +96,7 @@ jobs:
 
       - name: Upload whl
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: |
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload Linux Executable
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux_executable
           path: |
@@ -113,7 +113,7 @@ jobs:
 
       - name: Upload Windows Executable
         if: ${{ matrix.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows_executable
           path: |
