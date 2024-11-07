@@ -109,7 +109,7 @@ class web:
 
     @sleep_and_retry(sleep_and_retry.sleep_policy_e.RANDOM)
     def _get_game_save(self, game_link:str):
-        response = self.session.get(game_link + f"?{g_language_specifier}")
+        response = self.session.get(game_link)
         if (response.status_code != 200):
             err.err(err_enum.CANNOT_RETRIEVE_GAME_FILES).log()
             return (None, None)
@@ -122,6 +122,7 @@ class web:
         next_page_link = game_link
         save_file_list = list()
         while True:
+            logger.debug(f"Next page link: {next_page_link}")
             partial_save_file_list, next_page_link = \
                 self._get_game_save(next_page_link)
             if partial_save_file_list is None:
@@ -129,6 +130,7 @@ class web:
             save_file_list += partial_save_file_list
             if next_page_link is None:
                 break
+            next_page_link += f"&{g_language_specifier}"
         return save_file_list
 
     @sleep_and_retry(sleep_and_retry.sleep_policy_e.EXP)

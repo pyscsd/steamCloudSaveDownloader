@@ -35,5 +35,5 @@ source = "vcs"
 packages = ["steamCloudSaveDownloader"]
 
 [tool.ruff]
-lint.select = ["E9", "F63", "F7", "F82"]
+select = ["E9", "F63", "F7", "F82"]
 target-version= "py39"

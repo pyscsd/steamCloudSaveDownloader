@@ -31,6 +31,7 @@ def parse_time(input:str) -> datetime.datetime:
         return tokens[0].isdigit()
 
     if '@' not in input:
+        logger.error(f"Unable to parse time token '{input}'")
         raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
 
     # Assume 'DD MMM [YYYY] @ HH:MM{a|p}m' format
