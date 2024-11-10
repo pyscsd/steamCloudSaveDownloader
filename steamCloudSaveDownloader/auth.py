@@ -1,4 +1,3 @@
-#import steam.webauth as wa
 from http import HTTPStatus
 from steampy.login import LoginExecutor
 from steampy import guard
@@ -45,15 +44,21 @@ class auth:
         self.data_dir = data_dir
         self.two_factor_method = two_factor_method
 
-    def new_session(self, username:str):
+    def new_session(
+            self,
+            p_username:str,
+            p_password:str="",
+            p_two_factor:str=""):
         self.session = requests.Session()
         self.session.cookies.set('steamRememberLogin', 'true')
-        self.username = username
+        self.username = p_username
 
-        print("This program will NOT save your credential locally")
-        print(f'Username: {self.username}')
-
-        self.password = getpass.getpass()
+        if len(p_password) == 0:
+            print("This program will NOT save your credential locally")
+            print(f'Username: {self.username}')
+            self.password = getpass.getpass()
+        else:
+            self.password = p_password
 
         if self.two_factor_method == 'mail':
             LoginExecutor._update_steam_guard = \
@@ -69,9 +74,14 @@ class auth:
             except:
                 pass
 
-        print("2FA code on Steam Authenticator (Please get the 5 digits code manually)")
-        self.two_factor_code = input("2FA code (case insensitive): ")
-        self.two_factor_code = self.two_factor_code.upper()
+
+        if (len(p_two_factor) == 0):
+            print("2FA code on Steam Authenticator (Please get the 5 digits code manually)")
+            self.two_factor_code = input("2FA code (case insensitive): ")
+            self.two_factor_code = self.two_factor_code.upper()
+        else:
+            self.two_factor_code = p_two_factor.upper()
+
         try:
             self.login_executor = LoginExecutor(
                 self.username,
