@@ -165,7 +165,7 @@ class config:
             if section != "DEFAULT" and section not in Defaults:
                 logger.warning(f'Unknown section "[{section}]" exist in config file')
 
-    def get_conf(self):
+    def get_conf(self) -> dict:
         self.check_additional_section()
         self.parse_general()
         self.parse_log()
@@ -188,3 +188,21 @@ class config:
         if 'auth' in parsed_args:
             self.parsed['auth'] = parsed_args['auth']
         return self.parsed
+
+    @staticmethod
+    def export_to_file(config:dict, location:pathlib.Path):
+        with open(location, 'w') as f:
+            for section_name, section in config.items():
+                f.write(f'[{section_name}]\n')
+                for key, value in config[section_name].items():
+                    if type(value) == list:
+                        string_value = str(value).strip('[').strip(']')
+                        if len(string_value) == 0:
+                            continue
+                        if string_value == Defaults[section_name][key][1]:
+                            continue
+                        f.write(f'{key} = {string_value}\n')
+                    elif value == Defaults[section_name][key][1]:
+                        continue
+                    else:
+                        f.write(f'{key} = {value}\n')
