@@ -47,16 +47,12 @@ class config:
 
         if self.config_file is not None:
             try:
-                self.parser.read(self.config_file)
+                self.reload()
                 logger.info(f"Config read from '{self.config_file}'")
             except configparser.MissingSectionHeaderError as e:
                 self.raise_err("[PLACEHOLDER_TEXT] section required for entire file")
         else:
             self.parser = None
-
-        self.parsed = dict()
-        for key in Defaults.keys():
-            self.parsed[key] = dict()
 
         if auth:
             self.parsed['auth'] = auth
@@ -206,3 +202,9 @@ class config:
                         continue
                     else:
                         f.write(f'{key} = {value}\n')
+
+    def reload(self):
+        self.parser.read(self.config_file)
+        self.parsed = dict()
+        for key in Defaults.keys():
+            self.parsed[key] = dict()
