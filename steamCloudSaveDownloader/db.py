@@ -12,6 +12,7 @@ TABLE GAMES
 app_id (integer) PK, CONSTRAINT >0
 game_name (text)
 dir_name (text)
+last_checked_time (datetime)
 
 TABLE FILES
 file_id (INT) PK
@@ -61,6 +62,13 @@ class db:
         if res.fetchone() is None:
             return False
 
+        res = cur.execute("PRAGMA table_info('GAMES')")
+        result = res.fetchall()
+        if result is None:
+            return False
+        if 'last_checked_time' not in [tup[1] for tup in result]:
+            return False
+
         res = cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='FILES';")
         if res.fetchone() is None:
             return False
@@ -78,15 +86,22 @@ class db:
     def initialize_schema(self):
         cur = self.con.cursor()
         res = cur.execute(
-            "CREATE TABLE GAMES("
+            "CREATE TABLE IF NOT EXISTS GAMES("
             "  app_id INTEGER CHECK (app_id>0),"
             "  game_name text,"
             "  dir_name text,"
+            "  last_checked_time timestamp DEFAULT (unixepoch(0)),"
             "  PRIMARY KEY (app_id)"
             ");")
 
+        res = cur.execute("PRAGMA table_info('GAMES')")
+        result = res.fetchall()
+        if result is None or 'last_checked_time' not in [tup[1] for tup in result]:
+            logger.info(f'Adding last_checked_time')
+            res = cur.execute("ALTER TABLE GAMES ADD COLUMN last_checked_time timestamp;")
+
         res = cur.execute(
-            "CREATE TABLE FILES("
+            "CREATE TABLE IF NOT EXISTS FILES("
             "  file_id INTEGER PRIMARY KEY AUTOINCREMENT,"
             "  filename TEXT,"
             "  path TEXT,"
@@ -95,7 +110,7 @@ class db:
             ");")
 
         res = cur.execute(
-            "CREATE TABLE VERSION("
+            "CREATE TABLE IF NOT EXISTS VERSION("
             "  version_id INTEGER PRIMARY KEY AUTOINCREMENT,"
             "  file_id INTEGER,"
             "  time timestamp,"
@@ -104,13 +119,15 @@ class db:
             ");")
 
         res = cur.execute(
-            "CREATE TABLE REQUESTS("
+            "CREATE TABLE IF NOT EXISTS REQUESTS("
             "  id INTEGER PRIMARY KEY CHECK (id = 0),"
             "  time timestamp,"
             "  num int DEFAULT 0"
             ");")
 
-        res = cur.execute("INSERT INTO REQUESTS VALUES (?, ?, 0);", (0, datetime.datetime.now()))
+        res = cur.execute("SELECT num FROM REQUESTS WHERE id = 0;")
+        if len(res.fetchone()) == 0:
+            res = cur.execute("INSERT INTO REQUESTS VALUES (?, ?, 0);", (0, datetime.datetime.now()))
 
         self.con.commit()
 
@@ -139,7 +156,7 @@ class db:
 
     def add_new_game(self, app_id:int, game_name:str):
         cur = self.con.cursor()
-        res = cur.execute("INSERT INTO GAMES VALUES (?, ?, NULL);", (app_id, game_name))
+        res = cur.execute("INSERT INTO GAMES VALUES (?, ?, NULL, ?);", (app_id, game_name, datetime.datetime.now(tz=datetime.timezone.utc)))
         self.con.commit()
 
     def set_game_dir(self, app_id:int, dir_name:str):
@@ -170,8 +187,11 @@ class db:
         res = cur.execute("SELECT app_id FROM GAMES WHERE app_id = ?;", (app_id,))
         return res.fetchone() is not None
 
-    def get_game_files(self, app_id: int):
-        pass
+    def set_game_last_checked_time_to_now(self, app_id: int):
+        cur = self.con.cursor()
+        res = cur.execute("UPDATE GAMES SET last_checked_time = ? WHERE app_id = ?;", (datetime.datetime.now(tz=datetime.timezone.utc), app_id))
+
+        self.con.commit()
 
     # Expect [(filename, path, app_id, last_update_time), ...]
     def add_new_files(self, file_tuples:list):
@@ -237,11 +257,18 @@ class db:
 
         return outdated_version_num
 
+    def get_all_stored_game_infos(self):
+        cur = self.con.cursor()
+        query = "SELECT app_id, game_name, last_checked_time FROM GAMES;"
+        res = cur.execute(query)
+        result = res.fetchall()
+        return {tup for tup in result}
+
     def get_stored_game_names(self, ids:list):
         # Performance should be negligible other wise think of better
         # way to query
         cur = self.con.cursor()
-        query = "SELECT app_id, game_name FROM GAMES";
+        query = "SELECT app_id, game_name FROM GAMES;"
         res = cur.execute(query)
         result = res.fetchall();
         if len(ids) == 0:

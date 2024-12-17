@@ -189,10 +189,11 @@ def update_game(db_, storage_, web_, game, summary_):
         logger.warning(f"Unable to retrieve {game['name']} file list. Skipped.")
         return
 
-
     if (not db_.is_game_exist(game['app_id'])):
         add_new_game(db_, storage_, web_, game, file_infos, summary_)
         return
+
+    db_.set_game_last_checked_time_to_now(game['app_id'])
 
     requests_count = 1
     for file_info in file_infos:
