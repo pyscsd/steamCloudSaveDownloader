@@ -24,6 +24,16 @@ def setup_logger():
 
 setup_logger()
 
+def convert_to_log_level(level:int):
+    if (level == 0):
+        return logging.ERROR
+    elif (level == 1):
+        return logging.WARNING
+    elif (level == 2):
+        return logging.INFO
+    else:
+        return logging.DEBUG
+
 def setup_logger_post_config(p_filename: str, p_level):
     global logger
 
@@ -33,4 +43,7 @@ def setup_logger_post_config(p_filename: str, p_level):
         backupCount=5)
     fh.setFormatter(logger_formatter)
     logger.addHandler(fh)
-    logger.setLevel(p_level)
+    logger.setLevel(convert_to_log_level(p_level))
+
+def set_level(p_level: int):
+    logger.setLevel(convert_to_log_level(p_level))

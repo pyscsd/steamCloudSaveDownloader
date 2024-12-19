@@ -73,16 +73,6 @@ class args:
             help="Show the files saved locally"
         )
 
-    def convert_log_level(level:int):
-        if (level == 0):
-            return logging.ERROR
-        elif (level == 1):
-            return logging.WARNING
-        elif (level == 2):
-            return logging.INFO
-        else:
-            return logging.DEBUG
-
     def parse(self, raw_args):
         parsed_args = self.parser.parse_args(raw_args)
         return vars(parsed_args)

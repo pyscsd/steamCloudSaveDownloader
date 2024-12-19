@@ -6,7 +6,7 @@ from . import err
 from .notifier import notifier
 from . import storage
 from . import stored
-from .logger import logger, setup_logger_post_config
+from .logger import logger, setup_logger_post_config, convert_log_level
 from .summary import summary
 from . import utility
 from . import web
@@ -50,7 +50,7 @@ def parse():
     in_container_check(parsed_args)
     return parsed_args
 
-def should_process_appid(p_target:dict(), p_input:int) -> bool:
+def should_process_appid(p_target:dict, p_input:int) -> bool:
     if p_target['mode'] == '':
         return True
 
@@ -78,7 +78,7 @@ def __main__():
 
         setup_logger_post_config(
             os.path.join(parsed_args['General']['save_dir'], 'scsd.log'),
-            args.args.convert_log_level(parsed_args['Log']['log_level']))
+            parsed_args['Log']['log_level'])
 
         logger.info(f'Options: {parsed_args}')
 
