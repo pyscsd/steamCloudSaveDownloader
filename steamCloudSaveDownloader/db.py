@@ -3,7 +3,7 @@ import os
 import datetime
 from . import err
 from .err import err_enum
-import logging
+from .logger import logger
 
 DB_FILENAME = 'scsd.sqlite3'
 
@@ -34,8 +34,6 @@ count (int)
 
 
 '''
-
-logger = logging.getLogger('scsd')
 
 class db:
     requests_limit = 85000
@@ -126,7 +124,8 @@ class db:
             ");")
 
         res = cur.execute("SELECT num FROM REQUESTS WHERE id = 0;")
-        if len(res.fetchone()) == 0:
+        result = res.fetchone()
+        if result is None or len(result) == 0:
             res = cur.execute("INSERT INTO REQUESTS VALUES (?, ?, 0);", (0, datetime.datetime.now()))
 
         self.con.commit()

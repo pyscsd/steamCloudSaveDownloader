@@ -1,7 +1,7 @@
 from . import err
 from .err import err_enum
+from .logger import logger
 from .parser import web_parser
-from . import config
 from enum import IntEnum
 import requests
 import pickle
@@ -9,14 +9,11 @@ import shutil
 import time
 import random
 import os
-import logging
 
 g_language_specifier = "l=english"
 g_web_link = f"https://store.steampowered.com/account/remotestorage/?{g_language_specifier}"
 g_random_sleep_interval = (3, 5)
 g_retry_count = 3
-
-logger = logging.getLogger('scsd')
 
 class sleep_and_retry:
     class sleep_policy_e(IntEnum):

@@ -1,14 +1,13 @@
 from enum import Enum
 from .err import err
 from .err import err_enum
+from .logger import logger
 from . import ver
-import logging
 from discord_webhook import DiscordWebhook
 import subprocess
 import os
 import sys
 
-logger = logging.getLogger(__name__)
 
 class notify_method(Enum):
     Nop = 0

@@ -1,12 +1,10 @@
 from . import err
-from .notifier import notifier
 from .err import err_enum
+from .logger import logger
 from bs4 import BeautifulSoup
 import datetime
 import os
 import logging
-
-logger = logging.getLogger('scsd')
 
 g_language_specifier = "l=english"
 

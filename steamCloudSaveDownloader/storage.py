@@ -1,13 +1,11 @@
 import os
-import pathlib
 from . import db
 from . import err
 from .err import err_enum
+from .logger import logger
 import datetime
-import logging
 import signal
 
-logger = logging.getLogger('scsd')
 
 class keyboard_interrupt_handler:
     def __enter__(self):

@@ -6,45 +6,16 @@ from . import err
 from .notifier import notifier
 from . import storage
 from . import stored
+from .logger import logger, setup_logger_post_config
 from .summary import summary
 from . import utility
-from . import ver
 from . import web
 
-import logging
-import logging.handlers
 import os
 import sys
 import traceback
 
-logger = None
-
 g_lock_file_name = ".scsd.lock"
-g_logger_format = '%(asctime)s [%(levelname)s] %(message)s'
-g_logger_datefmt = '%Y-%m-%d %H:%M:%S'
-g_logger_formatter = logging.Formatter(
-    fmt=g_logger_format, datefmt=g_logger_datefmt)
-
-def setup_logger():
-    global logger
-
-    logger = logging.getLogger('scsd')
-    sh = logging.StreamHandler()
-    sh.setFormatter(g_logger_formatter)
-    logger.addHandler(sh)
-    logger.info(f'scsd-{ver.__version__} started')
-    logger.setLevel(logging.INFO)
-
-def setup_logger_post_config(parsed_args):
-    global logger
-
-    fh = logging.handlers.RotatingFileHandler(
-        os.path.join(parsed_args['General']['save_dir'], 'scsd.log'),
-        maxBytes=10485760, # 10MB
-        backupCount=5)
-    fh.setFormatter(g_logger_formatter)
-    logger.addHandler(fh)
-    logger.setLevel(args.args.convert_log_level(parsed_args['Log']['log_level']))
 
 def in_container_check(parsed_args):
     if os.path.isfile("/.scsd_dockerenv") and os.getenv("SCSD_DOCKER") is None:
@@ -101,12 +72,13 @@ def __main__():
 
     exit_num = 0
     try:
-        setup_logger()
         parsed_args = parse()
 
         utility.save_dir_permission_checking(parsed_args['General']['save_dir'])
 
-        setup_logger_post_config(parsed_args)
+        setup_logger_post_config(
+            os.path.join(parsed_args['General']['save_dir'], 'scsd.log'),
+            args.args.convert_log_level(parsed_args['Log']['log_level']))
 
         logger.info(f'Options: {parsed_args}')
 

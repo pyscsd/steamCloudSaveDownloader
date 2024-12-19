@@ -5,13 +5,12 @@ from steampy.models import SteamUrl
 import requests
 from .err import err
 from .err import err_enum
+from .logger import logger
 import pathlib
 import os
 import pickle
 import getpass
 import logging
-
-logger = logging.getLogger('scsd')
 
 def generate_one_time_code_override(p_input):
     return p_input

@@ -1,8 +1,5 @@
 from . import db
-
-import logging
-
-logger = logging.getLogger('scsd')
+from .logger import logger
 
 class stored:
     def __init__(self, staged_args, save_dir):

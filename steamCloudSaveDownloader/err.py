@@ -1,8 +1,7 @@
 import sys
 from enum import IntEnum
 import logging
-
-logger = logging.getLogger('scsd')
+from .logger import logger
 
 class err_enum(IntEnum):
     CANNOT_RETRIEVE_LIST = 1

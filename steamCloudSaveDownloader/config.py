@@ -1,12 +1,11 @@
 import configparser
 import os
 import pathlib
-import logging
 from .err import err
 from .err import err_enum
 from .notifier import notifier, notify_method
+from .logger import logger
 
-logger = logging.getLogger('scsd')
 
 Defaults = {
     'General': {
@@ -44,6 +43,8 @@ class config:
 
         self.config_file = file
         self.parser = configparser.ConfigParser()
+
+        self.init()
 
         if self.config_file is not None:
             try:
@@ -203,8 +204,11 @@ class config:
                     else:
                         f.write(f'{key} = {value}\n')
 
-    def reload(self):
-        self.parser.read(self.config_file)
+    def init(self):
         self.parsed = dict()
         for key in Defaults.keys():
             self.parsed[key] = dict()
+
+    def reload(self):
+        self.init()
+        self.parser.read(self.config_file)
