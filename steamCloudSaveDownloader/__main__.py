@@ -1,23 +1,18 @@
 from . import args
 from .auth import auth
 from . import config
-from . import db
+from . import downloader
 from . import err
 from .notifier import notifier
-from . import storage
 from . import stored
-from .logger import logger, setup_logger_post_config, convert_log_level
-from .summary import summary
+from .logger import logger, setup_logger_post_config
 from . import utility
-from . import web
 
 import os
 import sys
 import traceback
 
-g_lock_file_name = ".scsd.lock"
-
-def in_container_check(parsed_args):
+def in_container_check():
     if os.path.isfile("/.scsd_dockerenv") and os.getenv("SCSD_DOCKER") is None:
         logger.warning("Detect container environment. Please run scsd with `/opt/run.sh` and authentication with `scsd_auth`")
 
@@ -47,22 +42,8 @@ def parse():
                 stored=is_stored_specified(parsed_args['stored'])
             ).load_from_arg(parsed_args)
 
-    in_container_check(parsed_args)
+    in_container_check()
     return parsed_args
-
-def should_process_appid(p_target:dict, p_input:int) -> bool:
-    if p_target['mode'] == '':
-        return True
-
-    if p_target['mode'] == 'include':
-        return p_input in p_target['list']
-    elif p_target['mode'] == 'exclude':
-        return p_input not in p_target['list']
-
-    return True
-
-def get_overall_target_counts(p_target:dict, p_game_list:list) -> int:
-    return len([game for game in p_game_list if should_process_appid(p_target, game['app_id'])])
 
 
 def __main__():
@@ -90,7 +71,6 @@ def __main__():
             parsed_args['Notifier']['notifier'],
             **parsed_args['Notifier'])
 
-        create_lock_file(parsed_args['General']['save_dir'])
         main(parsed_args, notifier_)
     except err.err as e:
         if notifier_:
@@ -113,135 +93,18 @@ def __main__():
         else:
             print(ec)
         exit_num = err.err_enum.UNKNOWN_EXCEPTION.value
-    if exit_num != err.err_enum.LOCKED.value:
-        try:
-            delete_lock_file(parsed_args['General']['save_dir'])
-        except:
-            pass
     sys.exit(exit_num)
-
-def add_new_game(db_, storage_, web_, game, file_infos, summary_):
-    db_.add_new_game(game['app_id'], game['name'])
-    storage_.create_game_folder(game['name'], game['app_id'])
-
-    file_tuples = [(file_info['filename'], file_info['path'], game['app_id'], file_info['time']) for file_info in file_infos]
-    db_.add_new_files(file_tuples)
-
-    summary_.add_game(game['name'])
-
-    for file_info in file_infos:
-        download_game_save(storage_, web_, game, file_info)
-        summary_.add_game_file(
-            game['name'],
-            file_info['filename'],
-            None,
-            file_info['time'])
-
-    db_.add_requests_count(len(file_infos) + 1)
-
-def download_game_save(storage_, web_, game, file_info):
-    global logger
-    logger.info(f"Downloading {file_info['filename']}")
-    web_.download_game_save(
-        file_info['link'],
-        storage_.get_filename_location(game['app_id'],
-                                       file_info['filename'],
-                                       file_info['path'],
-                                       0),
-    )
-
-'''
-Return true if updated
-'''
-def update_game(db_, storage_, web_, game, summary_):
-    global logger
-    file_infos = web_.get_game_save(game['link'])
-
-    if file_infos is None:
-        logger.warning(f"Unable to retrieve {game['name']} file list. Skipped.")
-        return
-
-    if (not db_.is_game_exist(game['app_id'])):
-        add_new_game(db_, storage_, web_, game, file_infos, summary_)
-        return
-
-    db_.set_game_last_checked_time_to_now(game['app_id'])
-
-    requests_count = 1
-    for file_info in file_infos:
-        file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
-        if file_id is None:
-            file_tuples = [(file_info['filename'],
-                            file_info['path'],
-                            game['app_id'],
-                            file_info['time'])]
-            db_.add_new_files(file_tuples)
-            logger.info(f"New file {file_info['filename']} added")
-            file_id = db_.get_file_id(game['app_id'], file_info['path'], file_info['filename'])
-            download_game_save(storage_, web_, game, file_info)
-            summary_.add_game(game['name'])
-            summary_.add_game_file(
-                game['name'],
-                file_info['filename'],
-                None,
-                file_info['time'])
-        else:
-            outdated, db_time = db_.is_file_outdated(file_id, file_info['time'])
-            if (not outdated):
-                logger.debug(f"Ignore {file_info['filename']} (no change)")
-                continue
-
-            storage_.rotate_file(
-                game['app_id'],
-                file_info['filename'],
-                file_info['path'],
-                file_id,
-                file_info['time'])
-            download_game_save(storage_, web_, game, file_info)
-            storage_.remove_outdated(
-                game['app_id'],
-                file_info['filename'],
-                file_info['path'],
-                file_id)
-            summary_.add_game(game['name'])
-            summary_.add_game_file(
-                game['name'],
-                file_info['filename'],
-                db_time,
-                file_info['time'])
-
-        requests_count += 1
-
-    db_.add_requests_count(requests_count)
-
-    return
-
-def create_lock_file(path_):
-    lock_path = os.path.join(path_, g_lock_file_name)
-    if os.path.isfile(lock_path):
-        exception = err.err(err.err_enum.LOCKED)
-        exception.set_additional_info(f" (Path: {lock_path})")
-        raise exception
-
-    with open(lock_path, 'w') as f:
-        pass
-
-def delete_lock_file(path_):
-    lock_path = os.path.join(path_, g_lock_file_name)
-    if os.path.isfile(lock_path):
-        os.remove(lock_path)
 
 def main(parsed_args, notifier_):
     global logger
 
-    summary_ = summary(int(parsed_args['Notifier']['level']))
-    auth_ = auth(
-        parsed_args['General']['save_dir'],
-        parsed_args['General']['2fa'])
-
     if 'auth' in parsed_args and \
             parsed_args['auth'] is not None and \
             len(parsed_args['auth']) != 0:
+        auth_ = auth(
+            parsed_args['General']['save_dir'],
+            parsed_args['General']['2fa'])
+
         auth_.new_session(parsed_args['auth'])
         return
     elif 'stored' in parsed_args and \
@@ -250,36 +113,4 @@ def main(parsed_args, notifier_):
         stored_.get_result()
         return
 
-    auth_.refresh_session()
-    session_pkl = auth_.get_session_path()
-    web_ = web.web(session_pkl, parsed_args['Danger Zone']['wait_interval'])
-
-    db_ = db.db(parsed_args['General']['save_dir'],
-                parsed_args['Rotation']['rotation'])
-    storage_ = storage.storage(parsed_args['General']['save_dir'], db_)
-
-    logger.info("Getting Game Save List")
-    game_list = web_.get_list()
-
-    target_count = get_overall_target_counts(parsed_args['Target'], game_list)
-
-    current_game_index = 1
-
-    for game in game_list:
-        if db_.is_requests_limit_exceed():
-            raise err.err(err.err_enum.REQUESTS_LIMIT_EXCEED)
-        if not should_process_appid(parsed_args['Target'], game['app_id']):
-            logger.debug(f"Ignoring {game['name']} ({game['app_id']})")
-            continue
-
-        logger.info(f"({current_game_index}/{target_count}) Processing {game['name']}")
-        current_game_index += 1
-        update_game(db_, storage_, web_, game, summary_)
-
-    if summary_.has_changes():
-        summary_str = summary_.get()
-        if summary_str and len(summary_str) != 0:
-            notifier_.send(summary_str, True)
-    else:
-        if parsed_args['Notifier']['notify_if_no_change']:
-            notifier_.send("No changes", True)
+    downloader.download_all_games(parsed_args, notifier_)
