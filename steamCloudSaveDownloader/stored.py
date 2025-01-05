@@ -2,10 +2,10 @@ from . import db
 from .logger import logger
 
 class stored:
-    def __init__(self, staged_args, save_dir):
+    def __init__(self, staged_args, config_dir):
         self.target = staged_args
-        self.save_dir = save_dir
-        self.db = db.db(save_dir)
+        self.config_dir = config_dir
+        self.db = db.db(config_dir)
 
     def get_result(self):
         id_and_names = self.db.get_stored_game_names(self.target)

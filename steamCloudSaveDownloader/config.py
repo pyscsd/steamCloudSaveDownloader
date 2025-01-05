@@ -10,6 +10,7 @@ from .logger import logger
 Defaults = {
     'General': {
         "save_dir": (str, "./data"),
+        "config_dir": (str, ""),
         "2fa": (str, "mobile", ("mobile", "mail"))
     },
     'Rotation': {
@@ -137,6 +138,8 @@ class config:
 
     def parse_general(self):
         self.parse_optional_section('General')
+        if self.parsed['General']['config_dir'] == "":
+            self.parsed['General']['config_dir'] = self.parsed['General']['save_dir']
 
     def parse_log(self):
         self.parse_optional_section('Log')

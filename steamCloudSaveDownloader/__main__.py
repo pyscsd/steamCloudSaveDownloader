@@ -55,10 +55,11 @@ def __main__():
     try:
         parsed_args = parse()
 
-        utility.save_dir_permission_checking(parsed_args['General']['save_dir'])
+        utility.dir_permission_checking(parsed_args['General']['save_dir'])
+        utility.dir_permission_checking(parsed_args['General']['config_dir'])
 
         setup_logger_post_config(
-            os.path.join(parsed_args['General']['save_dir'], 'scsd.log'),
+            os.path.join(parsed_args['General']['config_dir'], 'scsd.log'),
             parsed_args['Log']['log_level'])
 
         logger.info(f'Options: {parsed_args}')
@@ -102,14 +103,14 @@ def main(parsed_args, notifier_):
             parsed_args['auth'] is not None and \
             len(parsed_args['auth']) != 0:
         auth_ = auth(
-            parsed_args['General']['save_dir'],
+            parsed_args['General']['config_dir'],
             parsed_args['General']['2fa'])
 
         auth_.new_session(parsed_args['auth'])
         return
     elif 'stored' in parsed_args and \
         parsed_args['stored'] is not None:
-        stored_ = stored.stored(parsed_args['stored'], parsed_args['General']['save_dir'])
+        stored_ = stored.stored(parsed_args['stored'], parsed_args['General']['config_dir'])
         stored_.get_result()
         return
 

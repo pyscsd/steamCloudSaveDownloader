@@ -43,7 +43,7 @@ class downloader:
         self.notifier = None
 
         self.auth = auth(
-            p_parsed_args['General']['save_dir'],
+            p_parsed_args['General']['config_dir'],
             p_parsed_args['General']['2fa'])
 
         self.auth.refresh_session()
@@ -52,15 +52,15 @@ class downloader:
             session_pkl,
             p_parsed_args['Danger Zone']['wait_interval'])
 
-        self.db = db.db(p_parsed_args['General']['save_dir'],
+        self.db = db.db(p_parsed_args['General']['config_dir'],
                     p_parsed_args['Rotation']['rotation'])
-        self.storage = storage.storage(p_parsed_args['General']['save_dir'], self.db)
+        self.storage = storage.storage(p_parsed_args['General']['config_dir'], self.db)
 
         logger.info("Getting Game Save List")
         self.game_list = self.web.get_list()
 
     def create_lock_file(self):
-        lock_path = os.path.join(self.parsed_args['General']['save_dir'], downloader.lock_file_name)
+        lock_path = os.path.join(self.parsed_args['General']['config_dir'], downloader.lock_file_name)
         if os.path.isfile(lock_path):
             exception = err.err(err.err_enum.LOCKED)
             exception.set_additional_info(f" (Path: {lock_path})")
@@ -70,7 +70,7 @@ class downloader:
             pass
 
     def delete_lock_file(self):
-        lock_path = os.path.join(self.parsed_args['General']['save_dir'], downloader.lock_file_name)
+        lock_path = os.path.join(self.parsed_args['General']['config_dir'], downloader.lock_file_name)
         if os.path.isfile(lock_path):
             os.remove(lock_path)
 
@@ -230,6 +230,13 @@ class downloader:
             if self.parsed_args['Notifier']['notify_if_no_change']:
                 self.notifier.send("No changes", True)
 
+    def update_new_games_to_db(self):
+        for game in self.game_list:
+            if (self.db.is_game_exist(game['app_id'])):
+                continue
+            self.db.add_new_game(game['app_id'], game['name'])
+            self.storage.create_game_folder(game['name'], game['app_id'])
+
 def download_games(p_parsed_args: dict, p_app_ids: list):
     downloader_ = downloader(p_parsed_args)
     downloader_.download_games(p_app_ids)
@@ -238,3 +245,8 @@ def download_all_games(p_parsed_args: dict, p_notifier):
     downloader_ = downloader(p_parsed_args)
     downloader_.show_summary(p_notifier)
     downloader_.download_all_games()
+
+def get_game_list_and_update(p_parsed_args: dict):
+    downloader_ = downloader(p_parsed_args)
+    downloader_.update_new_games_to_db()
+    return downloader_.game_list

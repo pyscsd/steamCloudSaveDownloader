@@ -3,7 +3,7 @@ from .err import err_enum
 
 import os
 
-def save_dir_permission_checking(save_dir: str):
+def dir_permission_checking(save_dir: str):
     err_ = err(err_enum.CANNOT_WRITE_TO_SAVE_DIR)
     err_.set_additional_info(f" `{save_dir}`")
 
