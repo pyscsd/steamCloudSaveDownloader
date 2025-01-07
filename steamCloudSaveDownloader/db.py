@@ -133,6 +133,12 @@ class db:
         if not self.schema_ok():
             raise err.err(err_enum.CANNOT_INITIALIZE_DB)
 
+    def get_now(self):
+        now = datetime.datetime.now(tz=datetime.timezone.utc)
+        now = now.replace(tzinfo=None)
+        now = now.replace(microsecond=0)
+        return now
+
     def add_requests_count(self, count:int):
         cur = self.con.cursor()
         res = cur.execute("SELECT time FROM REQUESTS WHERE id = 0;");
@@ -155,7 +161,7 @@ class db:
 
     def add_new_game(self, app_id:int, game_name:str):
         cur = self.con.cursor()
-        res = cur.execute("INSERT INTO GAMES VALUES (?, ?, NULL, ?);", (app_id, game_name, datetime.datetime.now(tz=datetime.timezone.utc)))
+        res = cur.execute("INSERT INTO GAMES VALUES (?, ?, NULL, ?);", (app_id, game_name, self.get_now()))
         self.con.commit()
 
     def set_game_dir(self, app_id:int, dir_name:str):
@@ -188,7 +194,7 @@ class db:
 
     def set_game_last_checked_time_to_now(self, app_id: int):
         cur = self.con.cursor()
-        res = cur.execute("UPDATE GAMES SET last_checked_time = ? WHERE app_id = ?;", (datetime.datetime.now(tz=datetime.timezone.utc), app_id))
+        res = cur.execute("UPDATE GAMES SET last_checked_time = ? WHERE app_id = ?;", (self.get_now(), app_id))
 
         self.con.commit()
 
