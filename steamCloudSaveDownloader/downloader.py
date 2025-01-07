@@ -54,7 +54,7 @@ class downloader:
 
         self.db = db.db(p_parsed_args['General']['config_dir'],
                     p_parsed_args['Rotation']['rotation'])
-        self.storage = storage.storage(p_parsed_args['General']['config_dir'], self.db)
+        self.storage = storage.storage(p_parsed_args['General']['save_dir'], self.db)
 
         logger.info("Getting Game Save List")
         self.game_list = self.web.get_list()
