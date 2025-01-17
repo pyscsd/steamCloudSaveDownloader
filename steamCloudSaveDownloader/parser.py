@@ -50,6 +50,11 @@ def parse_time(input:str) -> datetime.datetime:
             else:
                 d = datetime.datetime.strptime(input + " 2024", md_format)
             datetime_ = d.replace(year=year, tzinfo=datetime.timezone.utc)
+
+            # Check if future during year change
+            if datetime_ > now:
+                logger.debug(f"Parse time is future {datetime_} vs {now}")
+                datetime_ = datetime_.replace(year=year - 1)
         elif len(tokens) == 5:
             if is_dm_format(tokens):
                 datetime_ = datetime.datetime.strptime(input, dmy_format).replace(tzinfo=datetime.timezone.utc)
