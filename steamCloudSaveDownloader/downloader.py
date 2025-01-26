@@ -250,3 +250,20 @@ def get_game_list_and_update(p_parsed_args: dict):
     downloader_ = downloader(p_parsed_args)
     downloader_.update_new_games_to_db()
     return downloader_.game_list
+
+def get_account_id(p_parsed_args: dict):
+    account_id_file = os.path.join(p_parsed_args['General']['config_dir'], 'account_id')
+    if os.path.isfile(account_id_file):
+        with open(account_id_file, 'r') as f:
+            content = f.read()
+        return int(content)
+
+    auth_ = auth(
+        p_parsed_args['General']['config_dir'],
+        p_parsed_args['General']['2fa'])
+    auth_.refresh_session()
+    web_ = web.web(auth_.get_session_path(), p_parsed_args['Danger Zone']['wait_interval'])
+    account_id = web_.get_account_id()
+    with open(account_id_file, 'w') as f:
+        f.write(str(account_id))
+    return account_id

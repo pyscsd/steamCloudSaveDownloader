@@ -95,6 +95,13 @@ class web:
         except:
             raise err.err(err_enum.INVALID_COOKIE_FORMAT)
 
+    def get_account_id(self):
+        response = self.session.get(g_web_link)
+        if (response.status_code != 200):
+            raise err.err(err_enum.CANNOT_RETRIEVE_LIST)
+
+        return self.web_parser.get_account_id(response.text)
+
     # Return list of {"Game": name, "Link", link}
     # The first action, no sleep
     #@sleep_and_retry(sleep_and_retry.sleep_policy_e.RANDOM)

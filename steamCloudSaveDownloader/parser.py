@@ -4,7 +4,7 @@ from .logger import logger
 from bs4 import BeautifulSoup
 import datetime
 import os
-import logging
+import re
 
 g_language_specifier = "l=english"
 
@@ -79,6 +79,14 @@ def get_appid(link:str) -> int:
 class web_parser:
     def __init__(self):
         pass
+
+    def get_account_id(self, content):
+        result = re.findall('var g_AccountID = (.+?);', content)
+
+        print(result)
+        if len(result) != 1:
+            return 0
+        return int(result[0])
 
     def parse_index(self, content):
         try:
