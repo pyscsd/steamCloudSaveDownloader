@@ -6,8 +6,8 @@ ARG SCSD_VERSION
 # TODO: Dynamic tag version
 RUN apk --no-cache add \
     python3 \
-    py3-pip && \
-    pip install --no-cache-dir scsd${SCSD_VERSION:+==}${SCSD_VERSION:-} && \
+    pipx && \
+    pipx install scsd${SCSD_VERSION:+==}${SCSD_VERSION:-} --global && \
     mkdir /data && \
     mkdir /config
 
