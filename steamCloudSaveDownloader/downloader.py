@@ -99,8 +99,6 @@ class downloader:
         current_game_index = 1
 
         for game in self.game_list:
-            if self.db.is_requests_limit_exceed():
-                raise err.err(err.err_enum.REQUESTS_LIMIT_EXCEED)
             if not self.should_process_appid(game['app_id']):
                 logger.debug(f"Ignoring {game['name']} ({game['app_id']})")
                 continue
@@ -120,7 +118,10 @@ class downloader:
             self.download_game(game)
 
 
+    @downloader_locker
     def download_game(self, p_game):
+        if self.db.is_requests_limit_exceed():
+            raise err.err(err.err_enum.REQUESTS_LIMIT_EXCEED)
         self.update_game(p_game)
 
     '''
@@ -182,6 +183,7 @@ class downloader:
 
     def add_new_game(self, p_game, p_file_infos):
         self.db.add_new_game(p_game['app_id'], p_game['name'])
+        self.db.set_game_last_checked_time_to_now(p_game['app_id'])
         self.storage.create_game_folder(p_game['name'], p_game['app_id'])
 
         file_tuples = [(file_info['filename'], file_info['path'], p_game['app_id'], file_info['time']) for file_info in p_file_infos]

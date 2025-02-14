@@ -139,6 +139,12 @@ class db:
         now = now.replace(microsecond=0)
         return now
 
+    def get_epoch_0(self):
+        zero = datetime.datetime.fromtimestamp(0)
+        zero = zero.replace(tzinfo=None)
+        zero = zero.replace(microsecond=0)
+        return zero
+
     def add_requests_count(self, count:int):
         cur = self.con.cursor()
         res = cur.execute("SELECT time FROM REQUESTS WHERE id = 0;");
@@ -161,7 +167,7 @@ class db:
 
     def add_new_game(self, app_id:int, game_name:str):
         cur = self.con.cursor()
-        res = cur.execute("INSERT INTO GAMES VALUES (?, ?, NULL, ?);", (app_id, game_name, self.get_now()))
+        res = cur.execute("INSERT INTO GAMES VALUES (?, ?, NULL, ?);", (app_id, game_name, self.get_epoch_0()))
         self.con.commit()
 
     def set_game_dir(self, app_id:int, dir_name:str):
