@@ -139,7 +139,6 @@ class auth:
             pickle.dump(self.login_executor, f)
         os.umask(prev_umask)
         print("Login success. Please rerun scsd to start downloading")
-        print(self.session.cookies.items())
 
     def get_session_path(self):
         return os.path.join(self.data_dir, auth.s_session_filename)
