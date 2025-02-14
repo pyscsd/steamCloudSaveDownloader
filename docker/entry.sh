@@ -50,7 +50,7 @@ setup_auto_update() {
         return
     fi
 
-    cat /etc/crontabs/root | grep 'pip install -U scsd' > /dev/null 2> /dev/null
+    cat /etc/crontabs/root | grep 'pipx upgrade scsd' > /dev/null 2> /dev/null
     retval=$?
 
     if [ $retval -eq 0 ]; then
@@ -58,7 +58,7 @@ setup_auto_update() {
         return
     fi
 
-    echo "27 */4 * * * pip install -U scsd" >> /etc/crontabs/root
+    echo "27 */4 * * * pipx upgrade scsd --global" >> /etc/crontabs/root
     echo "[entry.sh] Auto update added to crontab"
 
 }

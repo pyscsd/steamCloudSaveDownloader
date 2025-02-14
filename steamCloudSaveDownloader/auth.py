@@ -34,6 +34,59 @@ def _update_steam_guard_mail_override(self, login_response: requests.Response) -
 
 guard.generate_one_time_code = generate_one_time_code_override
 
+# 2025/2/14 Hotfix
+from rsa import PublicKey
+from steampy.exceptions import ApiException
+def _fetch_rsa_params_override(self, current_number_of_repetitions: int = 0) -> dict:
+    self.session.get(SteamUrl.COMMUNITY_URL)
+    request_data = {'account_name': self.username}
+    response = self._api_call('GET', 'IAuthenticationService', 'GetPasswordRSAPublicKey', params=request_data)
+
+    if response.status_code == HTTPStatus.OK and 'response' in response.json():
+        key_data = response.json()['response']
+        # Steam may return an empty 'response' value even if the status is 200
+        if 'publickey_mod' in key_data and 'publickey_exp' in key_data and 'timestamp' in key_data:
+            rsa_mod = int(key_data['publickey_mod'], 16)
+            rsa_exp = int(key_data['publickey_exp'], 16)
+            return {'rsa_key': PublicKey(rsa_mod, rsa_exp), 'rsa_timestamp': key_data['timestamp']}
+
+    maximal_number_of_repetitions = 5
+    if current_number_of_repetitions < maximal_number_of_repetitions:
+        return self._fetch_rsa_params(current_number_of_repetitions + 1)
+
+    raise ApiException(f'Could not obtain rsa-key. Status code: {response.status_code}')
+LoginExecutor._fetch_rsa_params = _fetch_rsa_params_override
+
+def _perform_redirects_override(self, response_dict: dict) -> None:
+    parameters = response_dict.get('transfer_info')
+    if parameters is None:
+        raise Exception('Cannot perform redirects after login, no parameters fetched')
+    for pass_data in parameters:
+        pass_data['params'].update({'steamID': response_dict['steamID']})
+        multipart_fields = {
+            key: (None, str(value))
+            for key, value in pass_data['params'].items()
+        }
+        self.session.post(pass_data['url'], files = multipart_fields)
+LoginExecutor._perform_redirects = _perform_redirects_override
+
+from requests import Response
+def _finalize_login_override(self) -> Response:
+    community_domain = SteamUrl.COMMUNITY_URL[8:]
+    sessionid = self.session.cookies.get_dict(domain=community_domain)['sessionid']
+    redir = f'{SteamUrl.COMMUNITY_URL}/login/home/?goto='
+    files = {
+        'nonce': (None, self.refresh_token),
+        'sessionid': (None, sessionid),
+        'redir': (None, redir)
+    }
+    headers = {
+        'Referer': redir,
+        'Origin': 'https://steamcommunity.com'
+    }
+    return self.session.post("https://login.steampowered.com/jwt/finalizelogin", headers = headers, files = files)
+LoginExecutor._finalize_login = _finalize_login_override
+
 class auth:
     s_session_filename = 'session.sb'
     def __init__(
@@ -87,7 +140,7 @@ class auth:
                 self.password,
                 self.two_factor_code,
                 self.session)
-            self.login_executor.login()
+            sess = self.login_executor.login()
         except Exception as e:
             raise err(err_enum.LOGIN_FAIL)
 
@@ -96,6 +149,7 @@ class auth:
             pickle.dump(self.login_executor, f)
         os.umask(prev_umask)
         print("Login success. Please rerun scsd to start downloading")
+        print(self.session.cookies.items())
 
     def get_session_path(self):
         return os.path.join(self.data_dir, auth.s_session_filename)
@@ -109,12 +163,7 @@ class auth:
         with open(self.get_session_path(), 'rb') as f:
             self.login_executor = pickle.load(f)
 
-        sessionid = self.login_executor.session.cookies.get('sessionid', domain='store.steampowered.com')
-        redir = f'{SteamUrl.COMMUNITY_URL}/login/home/?goto='
-        finalized_data = {'nonce': self.login_executor.refresh_token, 'sessionid': sessionid, 'redir': redir}
-        finalized_response = self.login_executor.session.post(SteamUrl.LOGIN_URL + '/jwt/finalizelogin', data=finalized_data)
-
-        self.login_executor._perform_redirects(finalized_response.json())
+        self.login_executor._perform_redirects(self.login_executor._finalize_login().json())
 
         with open(self.get_session_path(), 'wb') as f:
             pickle.dump(self.login_executor, f)
