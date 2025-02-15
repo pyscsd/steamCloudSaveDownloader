@@ -59,6 +59,9 @@ class downloader:
         logger.info("Getting Game Save List")
         self.game_list = self.web.get_list()
 
+    def __del__(self):
+        del self.db
+
     def create_lock_file(self):
         lock_path = os.path.join(self.parsed_args['General']['config_dir'], downloader.lock_file_name)
         if os.path.isfile(lock_path):
