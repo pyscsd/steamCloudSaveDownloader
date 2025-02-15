@@ -6,6 +6,7 @@ from . import storage
 from . import web
 from .summary import summary
 
+from enum import Enum
 from functools import wraps
 import os
 
@@ -32,6 +33,9 @@ def downloader_locker(method):
             raise e
     return impl
 
+
+class callback_method_e(Enum):
+    download_game_file = 1
 
 class downloader:
     lock_file_name = ".scsd.lock"
@@ -61,6 +65,11 @@ class downloader:
 
     def __del__(self):
         del self.db
+
+    def set_callback(self, p_callback, p_callback_method: callback_method_e):
+        assert(callable(p_callback))
+        if p_callback_method == callback_method_e.download_game_file:
+            self.download_game_file_callback = p_callback
 
     def create_lock_file(self):
         lock_path = os.path.join(self.parsed_args['General']['config_dir'], downloader.lock_file_name)
@@ -146,6 +155,10 @@ class downloader:
         requests_count = 1
         for file_info in file_infos:
             file_id = self.db.get_file_id(p_game['app_id'], file_info['path'], file_info['filename'])
+
+            if hasattr(self, "download_game_file_callback"):
+                self.download_game_file_callback(p_game['name'], file_info['filename'])
+
             if file_id is None:
                 file_tuples = [(file_info['filename'],
                                 file_info['path'],
