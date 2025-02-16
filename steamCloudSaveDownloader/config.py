@@ -3,7 +3,7 @@ import os
 import pathlib
 from .err import err
 from .err import err_enum
-from .notifier import notifier, notify_method
+from .notifier import notifier
 from .logger import logger
 
 
@@ -32,6 +32,9 @@ Defaults = {
     },
     'Danger Zone': {
         "wait_interval": (list, "3, 5")
+    },
+    'GUI': {
+        "minimize_to_tray": (bool, True)
     }
 }
 
@@ -98,7 +101,13 @@ class config:
             elif (p_type == int):
                 return int(p_val)
             elif (p_type == bool):
-                return bool(p_val)
+                if (type(p_val) == bool):
+                    return p_val
+                elif (type(p_val) == str):
+                    return p_val.lower() in ("true", "yes")
+                else:
+                    logger.warning(f"Unknown conversion to type bool of {p_val}")
+                    return bool(p_val)
             elif (p_type == list):
                 return self.delimit_list(p_val)
             else:
@@ -158,6 +167,9 @@ class config:
     def parse_danger_zone(self):
         self.parse_optional_section('Danger Zone')
 
+    def parse_gui(self):
+        self.parse_optional_section('GUI')
+
     def check_additional_section(self):
         if self.parser is None:
             return
@@ -173,6 +185,7 @@ class config:
         self.parse_notifier()
         self.parse_target()
         self.parse_danger_zone()
+        self.parse_gui()
         return self.parsed
 
     def load_from_arg(self, parsed_args:dict):
