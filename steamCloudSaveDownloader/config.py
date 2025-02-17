@@ -34,7 +34,8 @@ Defaults = {
         "wait_interval": (list, "3, 5")
     },
     'GUI': {
-        "minimize_to_tray": (bool, True)
+        "minimize_to_tray": (bool, True),
+        "download_interval": (int, 30)
     }
 }
 
