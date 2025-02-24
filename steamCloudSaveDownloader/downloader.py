@@ -40,6 +40,11 @@ class callback_method_e(Enum):
 class downloader:
     lock_file_name = ".scsd.lock"
 
+    @staticmethod
+    def has_lock_file(p_parsed_args):
+        lock_path = os.path.join(p_parsed_args['General']['config_dir'], downloader.lock_file_name)
+        return os.path.isfile(lock_path)
+
     def __init__(self, p_parsed_args: dict):
         self.parsed_args = p_parsed_args
 
