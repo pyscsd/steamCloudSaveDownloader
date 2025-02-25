@@ -140,7 +140,7 @@ class db:
         return now
 
     def get_epoch_0(self):
-        zero = datetime.datetime.fromtimestamp(0)
+        zero = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
         zero = zero.replace(tzinfo=None)
         zero = zero.replace(microsecond=0)
         return zero
