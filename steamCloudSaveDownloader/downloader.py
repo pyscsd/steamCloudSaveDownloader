@@ -155,8 +155,6 @@ class downloader:
             self.add_new_game(p_game, file_infos)
             return
 
-        self.db.set_game_last_checked_time_to_now(p_game['app_id'])
-
         requests_count = 1
         for file_info in file_infos:
             file_id = self.db.get_file_id(p_game['app_id'], file_info['path'], file_info['filename'])
@@ -199,12 +197,12 @@ class downloader:
             requests_count += 1
 
         self.db.add_requests_count(requests_count)
+        self.db.set_game_last_checked_time_to_now(p_game['app_id'])
 
         return
 
     def add_new_game(self, p_game, p_file_infos):
         self.db.add_new_game(p_game['app_id'], p_game['name'])
-        self.db.set_game_last_checked_time_to_now(p_game['app_id'])
         self.storage.create_game_folder(p_game['name'], p_game['app_id'])
 
         file_tuples = [(file_info['filename'], file_info['path'], p_game['app_id'], file_info['time']) for file_info in p_file_infos]
@@ -215,6 +213,7 @@ class downloader:
 
         self.add_summary(p_game, p_file_infos, None)
         self.db.add_requests_count(len(p_file_infos) + 1)
+        self.db.set_game_last_checked_time_to_now(p_game['app_id'])
 
     def download_game_save(self, p_game, p_file_info):
         logger.info(f"Downloading {p_file_info['filename']}")
