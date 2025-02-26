@@ -296,6 +296,13 @@ class db:
         logger.warning(f'AppID set {diff_set} not found in database')
         return return_payload
 
+    def get_game_info_by_appid(self, appid:int):
+        cur = self.con.cursor()
+        query = "SELECT game_name, dir_name, last_checked_time FROM GAMES WHERE app_id = ?";
+        res = cur.execute(query, (appid,))
+        result = res.fetchall();
+        return result
+
     def get_files_info_by_appid(self, appid:int):
         cur = self.con.cursor()
         query = "SELECT file_id, filename, path FROM FILES WHERE app_id = ?";
