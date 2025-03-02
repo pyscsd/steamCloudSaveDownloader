@@ -5,10 +5,17 @@ from .err import err_enum
 from .logger import logger
 import datetime
 import signal
+import threading
 
 
 class keyboard_interrupt_handler:
+    def __init__(self):
+        self.is_in_main_thread = \
+            threading.current_thread() is threading.main_thread()
     def __enter__(self):
+        if not self.is_in_main_thread:
+            return
+
         self.signal_received = False
         self.old_handler = signal.signal(signal.SIGINT, self.handler)
 
@@ -17,6 +24,9 @@ class keyboard_interrupt_handler:
         logger.warning('SIGINT received. Delaying to ensure consistency.')
 
     def __exit__(self, type, value, traceback):
+        if not self.is_in_main_thread:
+            return
+
         signal.signal(signal.SIGINT, self.old_handler)
         if self.signal_received:
             self.old_handler(*self.signal_received)
