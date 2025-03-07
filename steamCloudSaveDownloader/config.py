@@ -35,7 +35,8 @@ Defaults = {
     },
     'GUI': {
         "minimize_to_tray": (bool, True),
-        "download_interval": (int, 30)
+        "download_interval": (int, 30),
+        "auto_start": (bool, True)
     }
 }
 
