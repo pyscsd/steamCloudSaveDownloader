@@ -3,6 +3,8 @@
 
 Download/Backup Saves on Steam Cloud
 
+#### [💻User friendly (GUI) version](https://github.com/pyscsd/steamCloudSaveDownloaderGUI)
+
 ## :warning: DISCLAIMER
 - This program is not affiliated with Valve or Steam. Steam is a trademark of Valve Corporation.
 - Even though this program is thoroughly tested and theoretically does not violate EULA. This program does not come with warranty and use at your own risk. More of this on [Rate Limit Section](#Rate-Limit)
