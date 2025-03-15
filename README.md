@@ -7,7 +7,10 @@
 
 Download/Backup Saves on Steam Cloud
 
-#### [💻User friendly (GUI) version](https://github.com/pyscsd/steamCloudSaveDownloaderGUI)
+#### [💻User friendly (GUI) version](https://github.com/pyscsd/steamCloudSaveDownloaderGUI) now availible
+
+> [!IMPORTANT]
+> A critical security issue has been patched in v0.0.83. Please make sure you have updated to this version or later. Also, make sure to delete `session.sb` and re-generate (re-auth) it.
 
 ## :warning: DISCLAIMER
 - This program is not affiliated with Valve or Steam. Steam is a trademark of Valve Corporation.
