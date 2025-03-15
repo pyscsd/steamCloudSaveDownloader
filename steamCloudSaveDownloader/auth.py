@@ -144,6 +144,10 @@ class auth:
         except Exception as e:
             raise err(err_enum.LOGIN_FAIL)
 
+        self.login_executor.username = ""
+        del self.login_executor.username
+        self.login_executor.password = ""
+        del self.login_executor.password
         prev_umask = os.umask(0O0077)
         with open(self.get_session_path(), 'wb') as f:
             pickle.dump(self.login_executor, f)
