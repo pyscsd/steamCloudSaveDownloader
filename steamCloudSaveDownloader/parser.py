@@ -83,7 +83,6 @@ class web_parser:
     def get_account_id(self, content):
         result = re.findall('var g_AccountID = (.+?);', content)
 
-        print(result)
         if len(result) != 1:
             return 0
         return int(result[0])
