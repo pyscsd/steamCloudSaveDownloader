@@ -10,10 +10,49 @@ import time
 import random
 import os
 
-g_language_specifier = "l=english"
-g_web_link = f"https://store.steampowered.com/account/remotestorage/?{g_language_specifier}"
+g_default_language_code = "en"
+g_default_language_specifier = "l=english"
+g_web_link = f"https://store.steampowered.com/account/remotestorage/"
 g_random_sleep_interval = (3, 5)
 g_retry_count = 3
+
+g_code_to_api_mapping = {
+    "bg": "bulgarian",
+    "zh_CN": "schinese",
+    "zh_TW": "tchinese",
+    "cs": "czech",
+    "da": "danish",
+    "nl": "dutch",
+    "en": "english",
+    "fi": "finnish",
+    "fr": "french",
+    "de": "german",
+    "el": "greek",
+    "hu": "hungarian",
+    "id": "indonesian",
+    "it": "italian",
+    "ja": "japanese",
+    "ko": "koreana",
+    "no": "norwegian",
+    "pl": "polish",
+    "pt": "portuguese",
+    "pt_BR": "brazilian",
+    "ro": "romanian",
+    "ru": "russian",
+    "es_ES": "spanish",
+    "es_419": "latam",
+    "sv": "swedish",
+    "th": "thai",
+    "tr": "turkish",
+    "uk": "ukrainian",
+    "vi": "vietnamese"
+}
+
+def code_to_language_specifier(p_input: str):
+    global g_code_to_api_mapping
+    if p_input not in g_code_to_api_mapping:
+        return None
+    return f"l={g_code_to_api_mapping[p_input]}"
 
 class sleep_and_retry:
     class sleep_policy_e(IntEnum):
@@ -96,7 +135,8 @@ class web:
             raise err.err(err_enum.INVALID_COOKIE_FORMAT)
 
     def get_account_id(self):
-        response = self.session.get(g_web_link)
+        web_link = f"{g_web_link}?{g_default_language_specifier}"
+        response = self.session.get(web_link)
         if (response.status_code != 200):
             raise err.err(err_enum.CANNOT_RETRIEVE_LIST)
 
@@ -105,8 +145,13 @@ class web:
     # Return list of {"Game": name, "Link", link}
     # The first action, no sleep
     #@sleep_and_retry(sleep_and_retry.sleep_policy_e.RANDOM)
-    def get_list(self):
-        response = self.session.get(g_web_link)
+    # p_language, language_specifier (l=english)
+    def get_list(self, p_language=g_default_language_code):
+        language_specifier = code_to_language_specifier(p_language)
+        if language_specifier is None:
+            return None
+        web_link = f"{g_web_link}?{language_specifier}"
+        response = self.session.get(web_link)
         if (response.status_code != 200):
             raise err.err(err_enum.CANNOT_RETRIEVE_LIST)
 
@@ -135,7 +180,7 @@ class web:
             save_file_list += partial_save_file_list
             if next_page_link is None:
                 break
-            next_page_link += f"&{g_language_specifier}"
+            next_page_link += f"&{g_default_language_specifier}"
         return save_file_list
 
     @sleep_and_retry(sleep_and_retry.sleep_policy_e.EXP)

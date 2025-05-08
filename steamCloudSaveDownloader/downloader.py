@@ -268,6 +268,11 @@ def download_all_games(p_parsed_args: dict, p_notifier):
     downloader_.show_summary(p_notifier)
     downloader_.download_all_games()
 
+def get_game_list(p_parsed_args: dict, p_language: str):
+    logger.debug(f"Get game list with language: {p_language}")
+    downloader_ = downloader(p_parsed_args)
+    return downloader_.web.get_list(p_language)
+
 def get_game_list_and_update(p_parsed_args: dict):
     downloader_ = downloader(p_parsed_args)
     downloader_.update_new_games_to_db()
