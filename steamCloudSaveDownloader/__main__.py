@@ -131,7 +131,11 @@ def __main__():
         exit_num = err.err_enum.KB_INTERRUPT.value
         print("Keyboard interrupt received", file=sys.stderr)
     except Exception as e:
-        ec = traceback.format_exc()
+        ec = \
+            "".join(
+                traceback.TracebackException.from_exception(
+                    e,
+                    capture_locals=True).format())
         if notifier_:
             if not notifier_.send(f"\n```{ec}```", False):
                 logger.warning("Notifier not working as intended. Exception:")
