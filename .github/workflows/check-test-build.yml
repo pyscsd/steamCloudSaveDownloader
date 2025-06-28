@@ -79,7 +79,7 @@ jobs:
       - name: Pack (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          pyinstaller --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name "scsd_$(cat ./version.txt)_linux_amd64"
+          pyinstaller --bootloader-ignore-signals --add-data './version.txt:.' --collect-all steamCloudSaveDownloader --onefile ./scsd --name "scsd_$(cat ./version.txt)_linux_amd64"
 
       - name: Pack (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
