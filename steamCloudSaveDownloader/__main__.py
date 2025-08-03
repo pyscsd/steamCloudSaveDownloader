@@ -180,6 +180,7 @@ def download_game_save(storage_, web_, game, file_info):
                                        file_info['filename'],
                                        file_info['path'],
                                        0),
+        file_info['time']
     )
 
 '''
