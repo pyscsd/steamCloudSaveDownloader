@@ -223,6 +223,7 @@ class downloader:
                                         p_file_info['filename'],
                                         p_file_info['path'],
                                         0),
+            p_file_info['time']
         )
 
     def add_summary(self,

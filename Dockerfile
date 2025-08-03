@@ -5,6 +5,7 @@ ARG SCSD_VERSION
 # TODO Use pypi add auto update env
 # TODO: Dynamic tag version
 RUN apk --no-cache add \
+    tzdata \
     python3 \
     pipx && \
     pipx install scsd${SCSD_VERSION:+==}${SCSD_VERSION:-} --global && \

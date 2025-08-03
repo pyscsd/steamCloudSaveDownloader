@@ -7,6 +7,8 @@ import requests
 import pickle
 import shutil
 import time
+import datetime
+from zoneinfo import ZoneInfo
 import random
 import os
 
@@ -184,7 +186,12 @@ class web:
         return save_file_list
 
     @sleep_and_retry(sleep_and_retry.sleep_policy_e.EXP)
-    def download_game_save(self, link:str, store_location:str):
+    def download_game_save(self, link:str, store_location:str, mtime: datetime.datetime):
         with self.session.get(link, stream=True) as r:
             with open(store_location, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
+
+        server_tz = ZoneInfo("America/Los_Angeles")
+        delta = server_tz.utcoffset(mtime)
+        mtime_epoch = (mtime - delta).timestamp()
+        os.utime(store_location, (mtime_epoch, mtime_epoch))

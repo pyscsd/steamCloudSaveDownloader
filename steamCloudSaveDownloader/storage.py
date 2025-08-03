@@ -130,9 +130,13 @@ class storage:
             old_version_suffix = self.get_version_suffix(old)
             new_version_suffix = self.get_version_suffix(new)
 
-            os.rename(
-                os.path.join(path_to_save, filename + old_version_suffix),
-                os.path.join(path_to_save, filename + new_version_suffix))
+            old_name = os.path.join(path_to_save, filename + old_version_suffix)
+            new_name = os.path.join(path_to_save, filename + new_version_suffix)
+
+            old_file_info = os.stat(old_name)
+            old_mtime = old_file_info.st_mtime
+            os.rename(old_name, new_name)
+            os.utime(new_name, (old_mtime, old_mtime))
 
     # Move current version 0 to 1, 1 to 2, etc
     # Should be done before download file
