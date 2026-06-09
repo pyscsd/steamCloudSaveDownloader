@@ -49,7 +49,7 @@ class args:
             "-r",
             metavar="rotation_count",
             dest="rotation",
-            type=int,
+            type=self.is_positive_int,
             default=config.Defaults['Rotation']['rotation'][1],
             help="The amount of version for each file to keep"
         )
@@ -107,3 +107,9 @@ class args:
             return [int(token) for token in tokens]
         except:
             self.parser.error(f"The appid list '{arg}' is invalid. Should be 'app_id1,app_id2,...'")
+
+    def is_positive_int(self, arg):
+        if int(arg) > 0:
+            return int(arg)
+        else:
+            self.parser.error(f"The rotation count should be greater than 0")
