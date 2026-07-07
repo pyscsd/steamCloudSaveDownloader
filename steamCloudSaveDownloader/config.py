@@ -37,7 +37,8 @@ Defaults = {
         "minimize_to_tray": (bool, True),
         "download_interval": (int, 30),
         "auto_start": (bool, True),
-        "language": (str, "system")
+        "language": (str, "system"),
+        "download_local_only": (bool, False)
     }
 }
 
