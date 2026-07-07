@@ -21,6 +21,7 @@ class err_enum(IntEnum):
     LOCKED = 14,
     INVALID_SCRIPT_PATH = 15,
     CANNOT_WRITE_TO_SAVE_DIR = 16,
+    REFRESH_FAIL = 17,
     KB_INTERRUPT = 255
     UNKNOWN_EXCEPTION = 256
 
@@ -88,6 +89,10 @@ ERR_INFO = {
     err_enum.CANNOT_WRITE_TO_SAVE_DIR: [
         logging.ERROR,
         "Unable to write to the specified save_dir"
+    ],
+    err_enum.REFRESH_FAIL: [
+        logging.ERROR,
+        "Unable to refresh session. Please try to login again."
     ],
     err_enum.UNKNOWN_EXCEPTION: [
         logging.ERROR,

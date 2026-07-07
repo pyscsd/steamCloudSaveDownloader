@@ -132,7 +132,9 @@ class auth:
                 self.session)
             sess = self.login_executor.login()
         except Exception as e:
-            raise err(err_enum.LOGIN_FAIL)
+            err_ = err(err_enum.LOGIN_FAIL)
+            err_.set_additional_info(" Info: " + str(e))
+            raise err_
 
         self.login_executor.username = ""
         del self.login_executor.username
@@ -156,7 +158,12 @@ class auth:
         with open(self.get_session_path(), 'rb') as f:
             self.login_executor = pickle.load(f)
 
-        self.login_executor._perform_redirects(self.login_executor._finalize_login().json())
+        try:
+            self.login_executor._perform_redirects(self.login_executor._finalize_login().json())
+        except Exception as e:
+            err_ = err(err_enum.REFRESH_FAIL)
+            err_.set_additional_info(" Info: " + str(e))
+            raise err_
 
         with open(self.get_session_path(), 'wb') as f:
             pickle.dump(self.login_executor, f)
