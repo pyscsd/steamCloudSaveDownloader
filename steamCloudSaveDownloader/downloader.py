@@ -69,7 +69,8 @@ class downloader:
         self.game_list = self.web.get_list()
 
     def __del__(self):
-        del self.db
+        if self.db:
+            del self.db
 
     def set_callback(self, p_callback, p_callback_method: callback_method_e):
         assert(callable(p_callback))
