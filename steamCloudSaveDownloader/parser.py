@@ -1,7 +1,7 @@
 from . import err
 from .notifier import notifier
 from .err import err_enum
-from bs4 import BeautifulSoup
+from lxml import html
 import datetime
 import os
 import logging
@@ -10,16 +10,17 @@ logger = logging.getLogger('scsd')
 
 g_language_specifier = "l=english"
 
-def get_tbody(soup):
-    main_content = soup.find(id='main_content')
+def get_tbody(tree):
+    main_content = tree.xpath('//*[@id="main_content"]')
 
-    if (main_content is None):
+    if not main_content:
         raise err.err(err_enum.CANNOT_PARSE_LIST)
 
-    if (not hasattr(main_content, "table")):
+    tbody = main_content[0].xpath('.//table//tbody')
+    if not tbody:
         raise err.err(err_enum.CANNOT_PARSE_LIST)
 
-    return main_content.table.tbody
+    return tbody[0]
 
 def parse_time(input:str) -> datetime.datetime:
     dm_format = "%d %b @ %I:%M%p %Y"
@@ -90,45 +91,66 @@ class web_parser:
             raise e
 
     def _parse_index(self, content):
-        soup = BeautifulSoup(content, 'html.parser')
+        tree = html.fromstring(content)
 
-        tbody = get_tbody(soup)
+        tbody = get_tbody(tree)
 
         data = list()
 
-        rows = tbody.find_all('tr')
+        rows = tbody.xpath('.//tr')
         for row in rows:
-            cols = row.find_all('td')
+            cols = row.xpath('.//td')
+            if len(cols) < 4:
+                logger.warning(f"Row skipped in index: Expected at least 4 columns, found {len(cols)}.")
+                continue
+                
+            a_tag = cols[3].xpath('.//a')
+            if not a_tag:
+                logger.warning("Row skipped in index: Missing anchor link in the 4th column.")
+                continue
+                
+            href = a_tag[0].get('href', '')
             data.append({
-                "name": cols[0].text.strip(),
-                "link": f"{cols[3].a['href']}&{g_language_specifier}",
-                "app_id": get_appid(cols[3].a['href'])
+                "name": cols[0].text_content().strip(),
+                "link": f"{href}&{g_language_specifier}",
+                "app_id": get_appid(href)
             })
         return data
 
     def parse_game_file(self, content) -> tuple:
-        soup = BeautifulSoup(content, 'html.parser')
+        tree = html.fromstring(content)
 
-        tbody = get_tbody(soup)
+        tbody = get_tbody(tree)
 
         data = list()
-        rows = tbody.find_all('tr')
+        rows = tbody.xpath('.//tr')
 
         for row in rows:
-            cols = row.find_all('td')
-            path, filename = os.path.split(cols[1].text.strip())
-            time_str = cols[3].text.strip()
+            cols = row.xpath('.//td')
+            if len(cols) < 5:
+                logger.warning(f"Row skipped in game file: Expected at least 5 columns, found {len(cols)}.")
+                continue
+                
+            path, filename = os.path.split(cols[1].text_content().strip())
+            time_str = cols[3].text_content().strip()
             parsed_time = parse_time(time_str)
             logger.debug(f"Parse {filename} time '{time_str}' as '{parsed_time.isoformat()}'")
+            
+            a_tag = cols[4].xpath('.//a')
+            if not a_tag:
+                logger.warning(f"Row warning in game file '{filename}': Missing anchor link in the 5th column.")
+                
+            href = a_tag[0].get('href', '') if a_tag else ''
             data.append({
                 "filename": filename,
                 "path": path,
                 "time": parsed_time,
-                "link": cols[4].a['href']})
+                "link": href
+            })
 
-        has_next = soup.find('a', text='next >>')
+        has_next = tree.xpath('//a[text()="next >>"]')
 
-        if (has_next is None):
+        if (not has_next):
             return (data, None)
         else:
-            return (data, has_next['href'])
+            return (data, has_next[0].get('href'))
