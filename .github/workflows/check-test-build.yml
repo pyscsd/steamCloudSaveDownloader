@@ -1,6 +1,10 @@
 name: check-test-build
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - 'master'
   push:
     branches:
       - 'master'
