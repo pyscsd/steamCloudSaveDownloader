@@ -101,12 +101,12 @@ class web_parser:
         for row in rows:
             cols = row.xpath('.//td')
             if len(cols) < 4:
-                logger.warning(f"Row skipped in index: Expected at least 4 columns, found {len(cols)}.")
+                logger.debug(f"Row skipped in index: Expected at least 4 columns, found {len(cols)}.")
                 continue
                 
             a_tag = cols[3].xpath('.//a')
             if not a_tag:
-                logger.warning("Row skipped in index: Missing anchor link in the 4th column.")
+                logger.debug("Row skipped in index: Missing anchor link in the 4th column.")
                 continue
                 
             href = a_tag[0].get('href', '')
