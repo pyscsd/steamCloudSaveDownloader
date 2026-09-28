@@ -96,6 +96,8 @@ class web:
         try:
             with open(self.login_executor_pkl, 'rb') as f:
                 self.session.cookies.update(pickle.load(f).session.cookies)
+            # Force Steam to return timestamps in true UTC natively
+            self.session.cookies.set('timezoneOffset', '0,0', domain='store.steampowered.com')
         except:
             raise err.err(err_enum.INVALID_COOKIE_FORMAT)
 

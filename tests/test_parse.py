@@ -1,6 +1,7 @@
 import steamCloudSaveDownloader.parser as parser
 
 import datetime
+from zoneinfo import ZoneInfo
 import os
 import pytest
 
@@ -21,7 +22,7 @@ def _current_year_time(time_str):
     parsed = datetime.datetime.strptime(time_str + " 2024", "%d %b @ %I:%M%p %Y")
     datetime_ = parsed.replace(year=now.year, tzinfo=datetime.timezone.utc)
     if datetime_ > now:
-        datetime_ = datetime_.replace(year=now.year - 1)
+        datetime_ = parsed.replace(year=now.year - 1, tzinfo=datetime.timezone.utc)
     return datetime_
 
 class TestParse:
@@ -101,3 +102,24 @@ class TestParse:
                 "link": "https://cdn.steamusercontent.com/filedownload/sdfsdfsd",
             },
         ]
+
+    def test_parse_time_fails_with_appended_timezone(self):
+        from steamCloudSaveDownloader.parser import parse_time
+        from steamCloudSaveDownloader.err import err
+
+        # Should parse normally without a timezone
+        try:
+            parse_time("12 Oct, 2022 @ 3:08pm")
+        except Exception as e:
+            pytest.fail(f"Valid time failed to parse: {e}")
+
+        # Should fail if Valve adds a timezone abbreviation
+        with pytest.raises(err) as exc_info:
+            parse_time("12 Oct, 2022 @ 3:08pm PST")
+        from steamCloudSaveDownloader.err import err_enum
+        assert exc_info.value.err_enum == err_enum.CANNOT_PARSE_GAME_FILES
+
+        with pytest.raises(err) as exc_info:
+            parse_time("12 Oct, 2022 @ 3:08pm UTC")
+        from steamCloudSaveDownloader.err import err_enum
+        assert exc_info.value.err_enum == err_enum.CANNOT_PARSE_GAME_FILES
