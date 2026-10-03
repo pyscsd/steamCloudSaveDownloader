@@ -142,7 +142,5 @@ class web:
             with open(store_location, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
 
-        server_tz = ZoneInfo("America/Los_Angeles")
-        delta = server_tz.utcoffset(mtime)
-        mtime_epoch = (mtime - delta).timestamp()
+        mtime_epoch = mtime.timestamp()
         os.utime(store_location, (mtime_epoch, mtime_epoch))

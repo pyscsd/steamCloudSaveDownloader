@@ -45,8 +45,7 @@ class DatabaseMigrator:
             if legacy_time.tzinfo is None:
                 utc_time = legacy_time.replace(tzinfo=steam_tz).astimezone(datetime.timezone.utc)
             else:
-                # If somehow already timezone aware, shift from PST
-                utc_time = legacy_time.replace(tzinfo=steam_tz).astimezone(datetime.timezone.utc)
+                utc_time = legacy_time.astimezone(datetime.timezone.utc)
 
             # Standardize as naive UTC to match how scsd natively inserts new files
             naive_utc_time = utc_time.replace(tzinfo=None)

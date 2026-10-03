@@ -23,4 +23,6 @@ class stored:
                 for utc_date, version_num in version_info:
                     if utc_date and utc_date.tzinfo:
                         local_date = utc_date.astimezone().replace(tzinfo=None)
-                    print(f"    - {version_num} : {local_date if utc_date.tzinfo else utc_date}")
+                    else:
+                        local_date = utc_date
+                    print(f"    - {version_num} : {local_date}")

@@ -3,7 +3,7 @@ from .notifier import notifier
 from .err import err_enum
 from lxml import html
 import datetime
-from zoneinfo import ZoneInfo
+
 import os
 import logging
 
