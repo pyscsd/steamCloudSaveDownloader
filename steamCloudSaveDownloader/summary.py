@@ -40,9 +40,7 @@ class summary:
     def __init__(self, level:int):
         self.data = list()
         self.level = level
-        # Steam timezone is in PST
         self.local_tz = datetime.datetime.now().astimezone().tzinfo
-        self.server_tz = ZoneInfo("America/Los_Angeles")
 
     def add_game(self, game_name:str):
         if len(self.data) != 0 and self.data[-1]['name'] == game_name:
@@ -59,18 +57,21 @@ class summary:
         if self.data[-1]['name'] != game_name:
             return
 
-        def to_string(time):
-            if time is None:
+        def to_string(utc_time):
+            if utc_time is None:
                 return None
 
-            target_time = time.replace(tzinfo=self.server_tz).astimezone(self.local_tz).replace(tzinfo=None)
+            # time is in UTC, convert to local
+            if utc_time.tzinfo is None:
+                utc_time = utc_time.replace(tzinfo=datetime.timezone.utc)
+            local_time = utc_time.astimezone(self.local_tz).replace(tzinfo=None)
 
             now = datetime.datetime.now()
 
-            if target_time.year == now.year:
-                return target_time.strftime("%m-%d %H:%M")
+            if local_time.year == now.year:
+                return local_time.strftime("%m-%d %H:%M")
             else:
-                return target_time.isoformat(' ', 'minutes')
+                return local_time.isoformat(' ', 'minutes')
 
         self.data[-1]['files'].append(
             {

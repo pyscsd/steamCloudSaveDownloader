@@ -3,6 +3,7 @@ from .notifier import notifier
 from .err import err_enum
 from lxml import html
 import datetime
+
 import os
 import logging
 
@@ -38,7 +39,7 @@ def parse_time(input:str) -> datetime.datetime:
     # Assume 'DD MMM [YYYY] @ HH:MM{a|p}m' format
 
     tokens = input.split(' ')
-    datetime_ = None
+    utc_time = None
     try:
         if len(tokens) == 4:
             now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -50,17 +51,17 @@ def parse_time(input:str) -> datetime.datetime:
                 d = datetime.datetime.strptime(input + " 2024", dm_format)
             else:
                 d = datetime.datetime.strptime(input + " 2024", md_format)
-            datetime_ = d.replace(year=year, tzinfo=datetime.timezone.utc)
+            utc_time = d.replace(year=year, tzinfo=datetime.timezone.utc)
 
             # Check if future during year change
-            if datetime_ > now:
-                logger.debug(f"Parse time is future {datetime_} vs {now}")
-                datetime_ = datetime_.replace(year=year - 1)
+            if utc_time > now:
+                logger.debug(f"Parse time is future {utc_time} vs {now}")
+                utc_time = d.replace(year=year - 1, tzinfo=datetime.timezone.utc)
         elif len(tokens) == 5:
             if is_dm_format(tokens):
-                datetime_ = datetime.datetime.strptime(input, dmy_format).replace(tzinfo=datetime.timezone.utc)
+                utc_time = datetime.datetime.strptime(input, dmy_format).replace(tzinfo=datetime.timezone.utc)
             else:
-                datetime_ = datetime.datetime.strptime(input, mdy_format).replace(tzinfo=datetime.timezone.utc)
+                utc_time = datetime.datetime.strptime(input, mdy_format).replace(tzinfo=datetime.timezone.utc)
         else:
             logger.error(f"Unable to parse time token {input}")
             raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
@@ -68,7 +69,7 @@ def parse_time(input:str) -> datetime.datetime:
         logger.error(f"Unable to parse time token {input}")
         raise err.err(err_enum.CANNOT_PARSE_GAME_FILES)
 
-    return datetime_
+    return utc_time
 
 def get_appid(link:str) -> int:
     appid_token = 'appid='
@@ -103,12 +104,12 @@ class web_parser:
             if len(cols) < 4:
                 logger.debug(f"Row skipped in index: Expected at least 4 columns, found {len(cols)}.")
                 continue
-                
+
             a_tag = cols[3].xpath('.//a')
             if not a_tag:
                 logger.debug("Row skipped in index: Missing anchor link in the 4th column.")
                 continue
-                
+
             href = a_tag[0].get('href', '')
             data.append({
                 "name": cols[0].text_content().strip(),
@@ -130,16 +131,16 @@ class web_parser:
             if len(cols) < 5:
                 logger.debug(f"Row skipped in game file: Expected at least 5 columns, found {len(cols)}.")
                 continue
-                
+
             path, filename = os.path.split(cols[1].text_content().strip())
             time_str = cols[3].text_content().strip()
             parsed_time = parse_time(time_str)
             logger.debug(f"Parse {filename} time '{time_str}' as '{parsed_time.isoformat()}'")
-            
+
             a_tag = cols[4].xpath('.//a')
             if not a_tag:
                 logger.debug(f"Row warning in game file '{filename}': Missing anchor link in the 5th column.")
-                
+
             href = a_tag[0].get('href', '') if a_tag else ''
             data.append({
                 "filename": filename,

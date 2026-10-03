@@ -5,6 +5,9 @@ from . import err
 from .err import err_enum
 import logging
 
+sqlite3.register_adapter(datetime.datetime, lambda dt: dt.isoformat())
+sqlite3.register_converter("timestamp", lambda b: datetime.datetime.fromisoformat(b.decode("utf-8")))
+
 DB_FILENAME = 'scsd.sqlite3'
 
 '''Schema
@@ -37,6 +40,9 @@ count (int)
 logger = logging.getLogger('scsd')
 
 class db:
+    LATEST_DB_VERSION = 1
+    MINIMUM_DB_VERSION = 1
+
     requests_limit = 85000
     def __init__(self, db_location:str, rotation:int=0):
         self.location = db_location
@@ -47,6 +53,17 @@ class db:
 
         if not self.schema_ok():
             self.initialize_schema()
+
+
+    def get_db_version(self) -> int:
+        cur = self.con.cursor()
+        res = cur.execute("PRAGMA user_version;")
+        return res.fetchone()[0]
+
+    def set_db_version(self, version: int):
+        cur = self.con.cursor()
+        cur.execute(f"PRAGMA user_version = {version};")
+        self.con.commit()
 
     def __del__(self):
         if hasattr(self, 'con'):

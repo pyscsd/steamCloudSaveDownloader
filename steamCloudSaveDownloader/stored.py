@@ -20,5 +20,9 @@ class stored:
                 print(f"  - {location}/{filename}")
                 version_info = \
                     self.db.get_file_version_by_file_id(file_id)
-                for version_date, version_num in version_info:
-                    print(f"    - {version_num} : {version_date}")
+                for utc_date, version_num in version_info:
+                    if utc_date and utc_date.tzinfo:
+                        local_date = utc_date.astimezone().replace(tzinfo=None)
+                    else:
+                        local_date = utc_date
+                    print(f"    - {version_num} : {local_date}")

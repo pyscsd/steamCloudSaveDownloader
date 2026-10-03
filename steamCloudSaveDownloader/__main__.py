@@ -5,6 +5,7 @@ from . import db
 from . import err
 from .notifier import notifier
 from . import storage
+from . import migration
 from . import stored
 from .summary import summary
 from . import utility
@@ -263,7 +264,10 @@ def delete_lock_file(path_):
     if os.path.isfile(lock_path):
         os.remove(lock_path)
 
+
+
 def main(parsed_args, notifier_):
+
     global logger
 
     summary_ = summary(int(parsed_args['Notifier']['level']))
@@ -290,6 +294,14 @@ def main(parsed_args, notifier_):
                 parsed_args['Rotation']['rotation'])
     storage_ = storage.storage(parsed_args['General']['save_dir'], db_)
 
+    # Automatically apply bugfix migrations (e.g. PST->UTC correction)
+    migration.DatabaseMigrator(db_).run()
+
+    current_version = db_.get_db_version()
+    if current_version < db.db.MINIMUM_DB_VERSION:
+        logger.error(f"Database version {current_version} is unsupported and automatic migration failed.")
+        return
+
     logger.info("Getting Game Save List")
     game_list = web_.get_list()
 
@@ -315,3 +327,6 @@ def main(parsed_args, notifier_):
     else:
         if parsed_args['Notifier']['notify_if_no_change']:
             notifier_.send("No changes", True)
+
+if __name__ == "__main__":
+    __main__()
