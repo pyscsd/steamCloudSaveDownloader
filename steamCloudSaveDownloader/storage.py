@@ -94,8 +94,7 @@ class storage:
 
         path_to_save = os.path.join(self.location, db_game_dir, file_path)
 
-        if not os.path.isdir(path_to_save):
-            os.makedirs(path_to_save)
+        os.makedirs(path_to_save, exist_ok=True)
 
         return os.path.join(path_to_save, filename + version_suffix)
 

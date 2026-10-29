@@ -5,6 +5,7 @@ from . import db
 from . import err
 from .notifier import notifier
 from . import storage
+from . import migration
 from . import stored
 from .summary import summary
 from . import utility
@@ -61,6 +62,7 @@ def parse():
         else:
             return parsed_args
 
+    migration_arg = parsed_args.get('migration', False)
 
     if parsed_args['conf'] is not None:
         parsed_args = \
@@ -76,6 +78,7 @@ def parse():
                 stored=is_stored_specified(parsed_args['stored'])
             ).load_from_arg(parsed_args)
 
+    parsed_args['migration'] = migration_arg
     in_container_check(parsed_args)
     return parsed_args
 
@@ -263,7 +266,29 @@ def delete_lock_file(path_):
     if os.path.isfile(lock_path):
         os.remove(lock_path)
 
+
+
+def execute_migration(db_, current_version: int):
+    global logger
+
+    if current_version == db.db.LATEST_DB_VERSION:
+        logger.info("Database is already up to date.")
+        return
+
+    print("Please backup all the data and database file before proceeding.")
+    try:
+        confirm = input("Confirm migration? (y/N): ").strip().lower()
+    except EOFError:
+        confirm = ""
+    if confirm != 'y':
+        logger.info("Migration cancelled.")
+        return
+
+    migration.DatabaseMigrator(db_).run()
+    logger.info("Migration completed.")
+
 def main(parsed_args, notifier_):
+
     global logger
 
     summary_ = summary(int(parsed_args['Notifier']['level']))
@@ -282,12 +307,21 @@ def main(parsed_args, notifier_):
         stored_.get_result()
         return
 
+    db_ = db.db(parsed_args['General']['save_dir'],
+                parsed_args['Rotation']['rotation'])
+    current_version = db_.get_db_version()
+
+    if 'migration' in parsed_args and parsed_args['migration']:
+        execute_migration(db_, current_version)
+        return
+
+    if current_version < db.db.MINIMUM_DB_VERSION:
+        raise err.err(err.err_enum.NEED_DB_MIGRATION)
+
     auth_.refresh_session()
     session_pkl = auth_.get_session_path()
     web_ = web.web(session_pkl, parsed_args['Danger Zone']['wait_interval'])
 
-    db_ = db.db(parsed_args['General']['save_dir'],
-                parsed_args['Rotation']['rotation'])
     storage_ = storage.storage(parsed_args['General']['save_dir'], db_)
 
     logger.info("Getting Game Save List")

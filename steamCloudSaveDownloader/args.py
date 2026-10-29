@@ -73,6 +73,14 @@ class args:
             help="Show the files saved locally"
         )
 
+        self.parser.add_argument(
+            "-m",
+            "--migration",
+            dest="migration",
+            action="store_true",
+            help="Migrate the database to the current version"
+        )
+
     def convert_log_level(level:int):
         if (level == 0):
             return logging.ERROR

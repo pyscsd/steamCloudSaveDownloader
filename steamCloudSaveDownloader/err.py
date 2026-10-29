@@ -22,6 +22,7 @@ class err_enum(IntEnum):
     INVALID_SCRIPT_PATH = 15,
     CANNOT_WRITE_TO_SAVE_DIR = 16,
     REFRESH_FAIL = 17,
+    NEED_DB_MIGRATION = 18,
     KB_INTERRUPT = 255
     UNKNOWN_EXCEPTION = 256
 
@@ -93,6 +94,10 @@ ERR_INFO = {
     err_enum.REFRESH_FAIL: [
         logging.ERROR,
         "Unable to refresh session. Please try to login again."
+    ],
+    err_enum.NEED_DB_MIGRATION: [
+        logging.ERROR,
+        "Database version is unsupported. Please run with -m/--migration to migrate the database."
     ],
     err_enum.UNKNOWN_EXCEPTION: [
         logging.ERROR,

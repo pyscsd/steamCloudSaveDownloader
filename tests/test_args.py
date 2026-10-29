@@ -32,6 +32,16 @@ class TestArgs:
         result = args().parse(["-s", "123,456"])
         assert result['stored'] == [123, 456]
 
+    def test_migration_arg(self):
+        result = args().parse([])
+        assert result['migration'] is False
+
+        result = args().parse(["-m"])
+        assert result['migration'] is True
+
+        result = args().parse(["--migration"])
+        assert result['migration'] is True
+
     def test_combo(self, tmp_path):
         test_config = tmp_path / "test.conf"
         with open(test_config, "w") as f:

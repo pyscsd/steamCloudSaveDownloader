@@ -21,7 +21,7 @@ def _current_year_time(time_str):
     parsed = datetime.datetime.strptime(time_str + " 2024", "%d %b @ %I:%M%p %Y")
     datetime_ = parsed.replace(year=now.year, tzinfo=datetime.timezone.utc)
     if datetime_ > now:
-        datetime_ = datetime_.replace(year=now.year - 1)
+        datetime_ = parsed.replace(year=now.year - 1, tzinfo=datetime.timezone.utc)
     return datetime_
 
 class TestParse:
