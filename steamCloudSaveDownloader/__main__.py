@@ -17,6 +17,8 @@ import os
 import sys
 import traceback
 
+import psutil
+
 logger = None
 
 g_lock_file_name = ".scsd.lock"
@@ -248,15 +250,36 @@ def update_game(db_, storage_, web_, game, summary_):
 
     return
 
+def _read_lock_pid(lock_path: str) -> int | None:
+    with open(lock_path, 'r') as f:
+        content = f.read().strip()
+    if not content:
+        return None
+    return int(content)
+
+def _is_lock_holder_running(pid: int | None) -> bool:
+    if pid is None:
+        return False
+    return psutil.pid_exists(pid)
+
 def create_lock_file(path_):
     lock_path = os.path.join(path_, g_lock_file_name)
     if os.path.isfile(lock_path):
-        exception = err.err(err.err_enum.LOCKED)
-        exception.set_additional_info(f" (Path: {lock_path})")
-        raise exception
+        lock_pid = _read_lock_pid(lock_path)
+        logger.warning(f"Got lock file pid: {lock_pid}")
+        if _is_lock_holder_running(lock_pid):
+            exception = err.err(err.err_enum.LOCKED)
+            exception.set_additional_info(
+                f" (Path: {lock_path}, PID: {lock_pid})")
+            raise exception
+
+        logger.warning(
+            f"Removing stale lock file (Path: {lock_path}"
+            f"{f', PID: {lock_pid}' if lock_pid is not None else ''})")
+        os.remove(lock_path)
 
     with open(lock_path, 'w') as f:
-        pass
+        f.write(str(os.getpid()))
 
 def delete_lock_file(path_):
     lock_path = os.path.join(path_, g_lock_file_name)

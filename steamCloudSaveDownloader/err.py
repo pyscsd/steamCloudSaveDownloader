@@ -80,7 +80,7 @@ ERR_INFO = {
     ],
     err_enum.LOCKED: [
         logging.ERROR,
-        "Cannot create lock file. Please check if another instance is running or delete if program exit unexpectedly last time."
+        "Cannot create lock file. Please check if another instance is running."
     ],
     err_enum.INVALID_SCRIPT_PATH: [
         logging.ERROR,
